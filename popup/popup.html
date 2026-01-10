@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognitive Defense</title>
+    <link rel="stylesheet" href="popup.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="logo">
+                <span class="icon">🛡️</span>
+                <h1>Cognitive Defense</h1>
+            </div>
+            <div id="mode-status" class="status-badge break">Break</div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            <!-- Incognito Warning Banner -->
+            <div id="incognito-warning" class="warning-banner hidden">
+                <span class="warning-icon">⚠️</span>
+                <span class="warning-text">Incognito Access Required</span>
+                <button id="fix-incognito-btn" class="btn-xs">Fix</button>
+            </div>
+
+            <!-- Timer Section -->
+            <div class="timer-container">
+                <div class="timer-ring">
+                    <svg class="progress-ring" width="120" height="120">
+                        <circle class="progress-ring__circle" stroke="white" stroke-width="4" fill="transparent" r="52"
+                            cx="60" cy="60" />
+                    </svg>
+                    <div id="timer-display" class="timer-value">00:00:00</div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="controls-container">
+                <button id="start-btn" class="btn btn-primary" aria-label="Start Focus Session">
+                    <span class="btn-icon">▶</span> Start Focus
+                </button>
+                <button id="stop-btn" class="btn btn-danger hidden" aria-label="Stop Focus Session">
+                    <span class="btn-icon">⏹</span> End Session
+                </button>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <div class="toggle-container">
+                    <label class="switch">
+                        <input type="checkbox" id="guardian-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <div class="toggle-text">
+                        <span class="toggle-label">Time Guardian</span>
+                        <span id="guardian-stats" class="toggle-sublabel"
+                            style="display:none; font-size: 0.75rem; color: #9ca3af;">Checking...</span>
+                    </div>
+                </div>
+                <div class="toggle-container">
+                    <label class="switch">
+                        <input type="checkbox" id="block-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span class="toggle-label">Block Distractions</span>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="main-footer">
+            <a href="#" id="dashboard-link" class="footer-link">Dashboard</a>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <!-- Start Session Modal -->
+    <div id="start-modal" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <h3>Start Focus Session</h3>
+            <p>Enter a password to lock this session.</p>
+            <input type="password" id="session-password" placeholder="Session Password" class="input-field">
+            <div class="modal-actions">
+                <button id="confirm-start" class="btn btn-primary">Start</button>
+                <button id="cancel-start" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unlock Session Modal -->
+    <div id="unlock-modal" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <h3>Unlock Session</h3>
+            <p>Enter your session password or emergency code.</p>
+            <input type="password" id="unlock-password" placeholder="Unlock Code" class="input-field">
+            <p id="unlock-error" class="error-text hidden">Invalid password</p>
+            <div class="modal-actions">
+                <button id="confirm-stop" class="btn btn-danger">Unlock</button>
+                <button id="cancel-stop" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guardian Setup Modal -->
+    <div id="guardian-setup-modal" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <h3>Protect Time Guardian</h3>
+            <p>Set a password to prevent easy disabling.</p>
+            <input type="password" id="guardian-setup-password" placeholder="Create Password" class="input-field">
+            <div class="modal-actions">
+                <button id="guardian-save-btn" class="btn btn-primary">Save & Enable</button>
+                <button id="guardian-cancel-setup" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Guardian Unlock Modal -->
+    <div id="guardian-unlock-modal" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <h3>Disable Time Guardian</h3>
+            <p>Enter password to disable.</p>
+            <input type="password" id="guardian-unlock-password" placeholder="Password" class="input-field">
+            <p id="guardian-unlock-error" class="error-text hidden">Invalid password</p>
+            <div class="modal-actions">
+                <button id="guardian-confirm-unlock" class="btn btn-danger">Disable</button>
+                <button id="guardian-cancel-unlock" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Incognito Instructions Modal -->
+    <div id="incognito-modal" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <h3>⚠️ Access Required</h3>
+            <p>To prevent blocking bypass, this extension requires <strong>"Allow in Incognito"</strong> permissions.
+            </p>
+            <div class="instruction-steps">
+                <ol>
+                    <li>Click <strong>"Open Settings"</strong> below.</li>
+                    <li>Find <strong>Cognitive Defense</strong>.</li>
+                    <li>Toggle <strong>"Allow in Incognito"</strong> to ON.</li>
+                </ol>
+            </div>
+            <div class="modal-actions">
+                <button id="open-extensions-btn" class="btn btn-primary">Open Settings</button>
+                <button id="close-incognito-modal" class="btn btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognitive Defense - Dashboard</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>Cognitive Defense</h1>
+            <p>Security & Focus Control Center</p>
+        </header>
+
+        <nav class="nav-tabs">
+            <button class="tab-btn active" data-tab="blocklist">Blocklist</button>
+            <button class="tab-btn" data-tab="guardian">Time Guardian</button>
+            <button class="tab-btn" data-tab="duration">Duration</button>
+            <button class="tab-btn" data-tab="modes">Strict Mode</button>
+            <button class="tab-btn" data-tab="emergency">Security</button>
+            <button class="tab-btn" data-tab="logs">Audit Logs</button>
+            <button class="tab-btn" data-tab="risk">Risk Score</button>
+        </nav>
+
+        <main>
+            <section id="blocklist-tab" class="tab-content active">
+                <h2>Manage Blocked Sites</h2>
+                <form id="blocklist-form">
+                    <div style="display: flex; gap: 8px;">
+                        <input type="url" id="site-input" placeholder="Enter URL (e.g., https://youtube.com)" required>
+                        <button type="submit" class="btn primary"
+                            style="height: fit-content; margin-top: 1px;">Add</button>
+                    </div>
+                </form>
+                <ul id="blocklist" class="list">
+                    <!-- Dynamic list -->
+                </ul>
+            </section>
+
+            <section id="guardian-tab" class="tab-content">
+                <h2>Time Guardian Configuration</h2>
+                <div class="card">
+                    <h3>Daily Global Limit</h3>
+                    <div style="display: flex; gap: 8px; align-items: center; margin-bottom: 20px;">
+                        <input type="number" id="global-limit" min="1" max="1440" value="10" style="width: 100px;">
+                        <span style="color: var(--text-secondary);">minutes per day</span>
+                        <button id="save-guardian-limit" class="btn primary small">Update</button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 20px;">
+                    <h3>Today's Usage</h3>
+                    <table class="data-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+                        <thead>
+                            <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
+                                <th style="padding: 10px;">Domain</th>
+                                <th style="padding: 10px;">Time Spent</th>
+                                <th style="padding: 10px;">Limit</th>
+                            </tr>
+                        </thead>
+                        <tbody id="guardian-usage-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section id="duration-tab" class="tab-content">
+                <h2>Default Session Duration</h2>
+                <form id="duration-form">
+                    <label style="display: block; margin-bottom: 8px; color: var(--text-secondary);">Minutes:</label>
+                    <input type="number" id="duration-input" min="5" max="480" value="25" required>
+                    <button type="submit" class="btn primary">Save Duration</button>
+                </form>
+                <p id="current-duration" style="margin-top: 16px; color: var(--text-secondary);">Currently set to: 25
+                    minutes</p>
+            </section>
+
+            <section id="modes-tab" class="tab-content">
+                <h2>Strict Mode Configuration</h2>
+                <div
+                    style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border: 1px solid var(--glass-border);">
+                    <label for="strict-toggle" class="toggle-label">
+                        <input type="checkbox" id="strict-toggle" class="toggle">
+                        <span class="toggle-slider"></span>
+                        <div style="display: flex; flex-direction: column;">
+                            <span style="font-weight: 500;">Enable Strict Blocking</span>
+                            <span style="font-size: 12px; color: var(--text-secondary);">Prevents all access to major
+                                social media platforms regardless of blocklist.</span>
+                        </div>
+                    </label>
+                </div>
+                <div id="strict-status" style="margin-top: 16px; font-size: 14px;">Status: Disabled</div>
+            </section>
+
+            <section id="emergency-tab" class="tab-content">
+                <h2>Emergency Unlock Rules</h2>
+                <p style="margin-bottom: 20px; color: var(--text-secondary); font-size: 13px;">
+                    Set a Master Unlock Code. This code can be used to emergency stop any session. It is stored securely
+                    (hashed).
+                </p>
+                <form id="emergency-form">
+                    <label style="display: block; margin-bottom: 8px;">Master Unlock Code</label>
+                    <input type="password" id="unlock-code" placeholder="Enter new master code">
+
+                    <label style="display: block; margin-bottom: 8px; margin-top: 16px;">Max Unlock Attempts</label>
+                    <input type="number" id="max-attempts" min="1" max="10" value="3">
+
+                    <button type="submit" class="btn primary" style="margin-top: 24px;">Update Security Rules</button>
+                </form>
+                <p id="emergency-status" style="margin-top: 16px; font-size: 13px; color: var(--success-color);">No
+                    rules set</p>
+            </section>
+
+            <section id="logs-tab" class="tab-content">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h2>Security Audit Logs</h2>
+                    <button id="refresh-logs" class="btn secondary"
+                        style="padding: 8px 16px; font-size: 12px;">Refresh</button>
+                </div>
+                <div id="logs-container" class="logs">
+                    <!-- Logs -->
+                </div>
+            </section>
+
+            <section id="risk-tab" class="tab-content">
+                <h2>Behavioral Risk Analysis</h2>
+                <div id="risk-score" class="risk-display">
+                    <div class="score-circle" id="score-circle">
+                        <span class="score-value">0</span>
+                    </div>
+                    <p id="risk-description" style="font-size: 18px; font-weight: 500;">Calculating...</p>
+                </div>
+                <div style="text-align: center;">
+                    <button id="refresh-risk" class="btn secondary">Analyze Now</button>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <button id="save-all" class="btn primary">Save All Settings</button>
+            <button id="reset" class="btn secondary">Reset Defaults</button>
+        </footer>
+    </div>
+    <script src="options.js"></script>
+</body>
+
+</html>
