@@ -1,4 +1,5 @@
 /* content/guardian.js - Time Guardian Overlay */
+// DISTRACTING_SITES and findMatchingDomain are loaded from config.js (included in manifest.json)
 
 const QUOTES = [
     "The bitterest tears shed over graves are for words left unsaid and deeds left undone.",
@@ -72,10 +73,7 @@ function checkStatus() {
     }
 }
 
-function findMatchingDomain(hostname) {
-    const SITES = ['facebook.com', 'instagram.com', 'tiktok.com', 'youtube.com', 'x.com', 'twitter.com', 'reddit.com', 'netflix.com'];
-    return SITES.find(site => hostname.endsWith(site)) || hostname;
-}
+// findMatchingDomain is now imported from config.js
 
 function showOverlay() {
     if (document.getElementById('cd-guardian-overlay')) return;

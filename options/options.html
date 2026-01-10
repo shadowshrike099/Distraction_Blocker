@@ -52,7 +52,31 @@
                 </div>
 
                 <div class="card" style="margin-top: 20px;">
+                    <h3>Time-Based Schedules</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+                        Apply different time limits during different hours of the day. The global limit will be multiplied by the schedule's multiplier.
+                    </p>
+                    <label for="schedules-toggle" class="toggle-label" style="margin-bottom: 16px;">
+                        <input type="checkbox" id="schedules-toggle" class="toggle">
+                        <span class="toggle-slider"></span>
+                        <span style="font-weight: 500;">Enable Time-Based Schedules</span>
+                    </label>
+
+                    <div id="schedules-container" style="margin-top: 16px;">
+                        <!-- Schedules will be populated here -->
+                    </div>
+                    <button id="add-schedule-btn" class="btn secondary small" style="margin-top: 12px;">+ Add Schedule</button>
+                </div>
+
+                <div class="card" style="margin-top: 20px;">
                     <h3>Today's Usage</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="color: var(--text-secondary); font-size: 13px;">Track time spent on distracting sites</span>
+                        <div style="display: flex; gap: 8px;">
+                            <button id="export-usage-csv" class="btn secondary small">Export CSV</button>
+                            <button id="export-usage-json" class="btn secondary small">Export JSON</button>
+                        </div>
+                    </div>
                     <table class="data-table" style="width: 100%; border-collapse: collapse; margin-top: 10px;">
                         <thead>
                             <tr style="text-align: left; border-bottom: 1px solid var(--glass-border);">
@@ -118,8 +142,12 @@
             <section id="logs-tab" class="tab-content">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
                     <h2>Security Audit Logs</h2>
-                    <button id="refresh-logs" class="btn secondary"
-                        style="padding: 8px 16px; font-size: 12px;">Refresh</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button id="export-logs-csv" class="btn secondary small">Export CSV</button>
+                        <button id="export-logs-json" class="btn secondary small">Export JSON</button>
+                        <button id="refresh-logs" class="btn secondary"
+                            style="padding: 8px 16px; font-size: 12px;">Refresh</button>
+                    </div>
                 </div>
                 <div id="logs-container" class="logs">
                     <!-- Logs -->
@@ -145,6 +173,7 @@
             <button id="reset" class="btn secondary">Reset Defaults</button>
         </footer>
     </div>
+    <script src="../config.js"></script>
     <script src="options.js"></script>
 </body>
 

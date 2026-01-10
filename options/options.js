@@ -1,12 +1,13 @@
 // options.js - Local state management for Cognitive Defense options/dashboard UI
+// STORAGE_KEYS and DISTRACTING_SITES are loaded from config.js
 
-// Storage keys for options
+// Storage keys for options (using centralized STORAGE_KEYS)
 const OPTIONS_STORAGE_KEYS = {
-    BLOCKED_SITES: 'optionsBlockedSites',
-    FOCUS_DURATION: 'optionsFocusDuration',
-    STRICT_MODE: 'optionsStrictMode',
-    EMERGENCY_CODE: 'optionsEmergencyCode',
-    MAX_ATTEMPTS: 'optionsMaxAttempts'
+    BLOCKED_SITES: STORAGE_KEYS.OPTIONS_BLOCKED_SITES,
+    FOCUS_DURATION: STORAGE_KEYS.OPTIONS_FOCUS_DURATION,
+    STRICT_MODE: STORAGE_KEYS.OPTIONS_STRICT_MODE,
+    EMERGENCY_CODE: STORAGE_KEYS.OPTIONS_EMERGENCY_CODE,
+    MAX_ATTEMPTS: STORAGE_KEYS.OPTIONS_MAX_ATTEMPTS
 };
 
 // Local state variables
@@ -16,6 +17,9 @@ let strictModeEnabled = false;
 let emergencyRules = { code: '', maxAttempts: 3 };
 let guardianLimits = { global: 10, overrides: {} };
 let dailyUsage = {};
+let timeSchedules = [];
+let timeSchedulesEnabled = false;
+let securityLogs = [];
 
 // DOM elements
 const tabBtns = document.querySelectorAll('.tab-btn');
@@ -56,6 +60,13 @@ const refreshRiskBtn = document.getElementById('refresh-risk');
 const globalLimitInput = document.getElementById('global-limit');
 const saveGuardianLimitBtn = document.getElementById('save-guardian-limit');
 const guardianUsageBody = document.getElementById('guardian-usage-body');
+const schedulesToggle = document.getElementById('schedules-toggle');
+const schedulesContainer = document.getElementById('schedules-container');
+const addScheduleBtn = document.getElementById('add-schedule-btn');
+const exportUsageCsvBtn = document.getElementById('export-usage-csv');
+const exportUsageJsonBtn = document.getElementById('export-usage-json');
+const exportLogsCsvBtn = document.getElementById('export-logs-csv');
+const exportLogsJsonBtn = document.getElementById('export-logs-json');
 
 // Initialize UI
 async function init() {
@@ -400,6 +411,16 @@ function setupEventListeners() {
     resetBtn.addEventListener('click', resetSettings);
     refreshRiskBtn.addEventListener('click', refreshRiskScore);
     saveGuardianLimitBtn.addEventListener('click', saveGuardianLimit);
+
+    // Time schedules
+    schedulesToggle.addEventListener('change', toggleTimeSchedules);
+    addScheduleBtn.addEventListener('click', addSchedule);
+
+    // Export buttons
+    exportUsageCsvBtn.addEventListener('click', () => exportUsageData('csv'));
+    exportUsageJsonBtn.addEventListener('click', () => exportUsageData('json'));
+    exportLogsCsvBtn.addEventListener('click', () => exportLogsData('csv'));
+    exportLogsJsonBtn.addEventListener('click', () => exportLogsData('json'));
 }
 
 // Guardian Functions
@@ -424,10 +445,10 @@ function saveGuardianSettings() {
 
 function renderGuardianUsage() {
     guardianUsageBody.innerHTML = '';
-    const SITES = ['facebook.com', 'instagram.com', 'tiktok.com', 'youtube.com', 'x.com', 'twitter.com', 'reddit.com', 'netflix.com'];
+    // Use centralized DISTRACTING_SITES from config.js
 
     // Merge known sites with any other usage data
-    const allDomains = new Set([...SITES, ...Object.keys(dailyUsage)]);
+    const allDomains = new Set([...DISTRACTING_SITES, ...Object.keys(dailyUsage)]);
 
     allDomains.forEach(domain => {
         const usageSec = dailyUsage[domain] || 0;
@@ -447,5 +468,215 @@ function renderGuardianUsage() {
     });
 }
 
+// ==========================================
+// Time-Based Schedules Functions
+// ==========================================
+
+function toggleTimeSchedules() {
+    timeSchedulesEnabled = schedulesToggle.checked;
+    chrome.storage.local.set({ [STORAGE_KEYS.TIME_SCHEDULES_ENABLED]: timeSchedulesEnabled });
+    updateSchedulesUI();
+}
+
+function updateSchedulesUI() {
+    schedulesContainer.style.opacity = timeSchedulesEnabled ? '1' : '0.5';
+    schedulesContainer.style.pointerEvents = timeSchedulesEnabled ? 'auto' : 'none';
+}
+
+function addSchedule() {
+    const newSchedule = {
+        id: Date.now(),
+        name: 'New Schedule',
+        startHour: 9,
+        endHour: 17,
+        limitMultiplier: 0.5,
+        enabled: true
+    };
+    timeSchedules.push(newSchedule);
+    saveTimeSchedules();
+    renderTimeSchedules();
+}
+
+function removeSchedule(id) {
+    timeSchedules = timeSchedules.filter(s => s.id !== id);
+    saveTimeSchedules();
+    renderTimeSchedules();
+}
+
+function updateSchedule(id, field, value) {
+    const schedule = timeSchedules.find(s => s.id === id);
+    if (schedule) {
+        schedule[field] = value;
+        saveTimeSchedules();
+    }
+}
+
+function saveTimeSchedules() {
+    chrome.storage.local.set({ [STORAGE_KEYS.TIME_SCHEDULES]: timeSchedules });
+}
+
+async function loadTimeSchedules() {
+    const result = await chrome.storage.local.get([
+        STORAGE_KEYS.TIME_SCHEDULES,
+        STORAGE_KEYS.TIME_SCHEDULES_ENABLED
+    ]);
+    timeSchedules = result[STORAGE_KEYS.TIME_SCHEDULES] || [];
+    timeSchedulesEnabled = result[STORAGE_KEYS.TIME_SCHEDULES_ENABLED] || false;
+    schedulesToggle.checked = timeSchedulesEnabled;
+    renderTimeSchedules();
+    updateSchedulesUI();
+}
+
+function renderTimeSchedules() {
+    schedulesContainer.innerHTML = '';
+
+    if (timeSchedules.length === 0) {
+        schedulesContainer.innerHTML = '<p style="color: var(--text-secondary); font-size: 13px; padding: 12px; text-align: center;">No schedules configured. Click "Add Schedule" to create one.</p>';
+        return;
+    }
+
+    timeSchedules.forEach(schedule => {
+        const scheduleDiv = document.createElement('div');
+        scheduleDiv.className = 'schedule-item';
+        scheduleDiv.style.cssText = 'background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; margin-bottom: 12px; border: 1px solid var(--glass-border);';
+
+        scheduleDiv.innerHTML = `
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                <input type="text" value="${schedule.name}"
+                    style="background: transparent; border: none; color: white; font-size: 14px; font-weight: 500; width: 60%;"
+                    onchange="updateSchedule(${schedule.id}, 'name', this.value)">
+                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px;">
+                    <input type="checkbox" ${schedule.enabled ? 'checked' : ''}
+                        onchange="updateSchedule(${schedule.id}, 'enabled', this.checked)">
+                    <span>Enabled</span>
+                </label>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                <div>
+                    <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Start Hour</label>
+                    <input type="number" min="0" max="23" value="${schedule.startHour}"
+                        style="width: 100%; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 4px; color: white;"
+                        onchange="updateSchedule(${schedule.id}, 'startHour', parseInt(this.value))">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">End Hour</label>
+                    <input type="number" min="0" max="23" value="${schedule.endHour}"
+                        style="width: 100%; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 4px; color: white;"
+                        onchange="updateSchedule(${schedule.id}, 'endHour', parseInt(this.value))">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Limit Multiplier</label>
+                    <input type="number" min="0.1" max="2" step="0.1" value="${schedule.limitMultiplier}"
+                        style="width: 100%; padding: 6px; background: rgba(0,0,0,0.3); border: 1px solid var(--glass-border); border-radius: 4px; color: white;"
+                        onchange="updateSchedule(${schedule.id}, 'limitMultiplier', parseFloat(this.value))">
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 12px; color: var(--text-secondary);">
+                    ${schedule.startHour}:00 - ${schedule.endHour}:00
+                    (${Math.floor((schedule.limitMultiplier * 100))}% of base limit)
+                </span>
+                <button onclick="removeSchedule(${schedule.id})" class="btn secondary small"
+                    style="padding: 4px 12px; font-size: 12px;">Remove</button>
+            </div>
+        `;
+
+        schedulesContainer.appendChild(scheduleDiv);
+    });
+}
+
+// Make functions globally available for inline event handlers
+window.updateSchedule = updateSchedule;
+window.removeSchedule = removeSchedule;
+
+// ==========================================
+// Data Export Functions
+// ==========================================
+
+function exportUsageData(format) {
+    const data = Object.entries(dailyUsage).map(([domain, seconds]) => ({
+        domain,
+        timeSpentSeconds: seconds,
+        timeSpentMinutes: Math.floor(seconds / 60),
+        limit: guardianLimits.overrides[domain] !== undefined
+            ? guardianLimits.overrides[domain]
+            : guardianLimits.global,
+        date: new Date().toISOString().split('T')[0]
+    }));
+
+    if (format === 'csv') {
+        exportAsCSV(data, 'usage-data', ['domain', 'timeSpentMinutes', 'limit', 'date']);
+    } else {
+        exportAsJSON(data, 'usage-data');
+    }
+}
+
+function exportLogsData(format) {
+    chrome.runtime.sendMessage({ type: 'GET_LOGS' }, (response) => {
+        if (response.success) {
+            const logs = response.logs;
+
+            if (format === 'csv') {
+                exportAsCSV(logs, 'security-logs', ['timestamp', 'type', 'event']);
+            } else {
+                exportAsJSON(logs, 'security-logs');
+            }
+        } else {
+            alert('Failed to load logs for export');
+        }
+    });
+}
+
+function exportAsCSV(data, filename, fields) {
+    if (data.length === 0) {
+        alert('No data to export');
+        return;
+    }
+
+    // Create CSV header
+    const headers = fields || Object.keys(data[0]);
+    let csvContent = headers.join(',') + '\n';
+
+    // Add rows
+    data.forEach(item => {
+        const row = headers.map(header => {
+            const value = item[header] || '';
+            // Escape quotes and wrap in quotes if contains comma
+            const stringValue = String(value);
+            if (stringValue.includes(',') || stringValue.includes('"')) {
+                return '"' + stringValue.replace(/"/g, '""') + '"';
+            }
+            return stringValue;
+        });
+        csvContent += row.join(',') + '\n';
+    });
+
+    downloadFile(csvContent, `${filename}-${new Date().toISOString().split('T')[0]}.csv`, 'text/csv');
+}
+
+function exportAsJSON(data, filename) {
+    const jsonContent = JSON.stringify(data, null, 2);
+    downloadFile(jsonContent, `${filename}-${new Date().toISOString().split('T')[0]}.json`, 'application/json');
+}
+
+function downloadFile(content, filename, mimeType) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+// ==========================================
+// Update loadSettings to include schedules
+// ==========================================
+
 // Initialize on load
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', async () => {
+    await init();
+    await loadTimeSchedules();
+});
