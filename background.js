@@ -1,27 +1,10 @@
 // background.js - Service worker for Cognitive Defense extension
 
+// Import centralized configuration
+importScripts('config.js');
+
 // Constants
 const ALARM_NAME = 'focus-session-end';
-const STORAGE_KEYS = {
-    SESSION_END_TIME: 'sessionEndTime',
-    PASSWORD_HASH: 'passwordHash',
-    PASSWORD_SALT: 'passwordSalt',
-    BLOCKED_SITES: 'blockedSites',
-    STRICT_MODE: 'strictMode',
-    SECURITY_LOGS: 'securityLogs',
-    FAILED_UNLOCK_ATTEMPTS: 'failedUnlockAttempts',
-    MAX_ATTEMPTS: 'maxAttempts',
-    // Time Guardian Keys
-    TIME_GUARDIAN_ENABLED: 'timeGuardianEnabled',
-    DAILY_USAGE: 'dailyUsage',
-    GUARDIAN_LIMITS: 'timeGuardianLimits',
-    LAST_RESET_DATE: 'lastResetDate',
-    GUARDIAN_PASSWORD_HASH: 'guardianPasswordHash',
-    GUARDIAN_PASSWORD_SALT: 'guardianPasswordSalt'
-};
-
-const DEFAULT_GLOBAL_LIMIT = 600; // 10 minutes
-const DISTRACTING_SITES = ['facebook.com', 'instagram.com', 'tiktok.com', 'youtube.com', 'x.com', 'twitter.com', 'reddit.com', 'netflix.com'];
 
 // Time Guardian State
 let timeGuardianEnabled = false;
@@ -113,9 +96,9 @@ async function updateBlockingRules(blockedSites, strictMode = false) {
 
     // 4. Strict mode rules
     if (currentStrictMode) {
-        const strictDomains = ['facebook.com', 'twitter.com', 'x.com', 'instagram.com', 'tiktok.com', 'reddit.com', 'netflix.com'];
-        // Removed youtube.com to allow Distraction-Free mode via content script
-        for (const domain of strictDomains) {
+        // Use centralized strict mode sites config
+        // YouTube excluded to allow Distraction-Free mode via content script
+        for (const domain of STRICT_MODE_SITES) {
             addBlockRule(`||${domain}^`);
         }
     }
@@ -715,16 +698,29 @@ async function updateActiveDomain() {
 async function checkLimitAndShowOverlay(domain, tabId = null) {
     if (!domain || !timeGuardianEnabled) return;
 
-    const limit = guardianLimits.overrides[domain] !== undefined
+    // Get base limit
+    let baseLimit = guardianLimits.overrides[domain] !== undefined
         ? guardianLimits.overrides[domain]
         : guardianLimits.global;
+
+    // Apply time-based scheduling if enabled
+    const { timeSchedulesEnabled, timeSchedules } = await chrome.storage.local.get([
+        STORAGE_KEYS.TIME_SCHEDULES_ENABLED,
+        STORAGE_KEYS.TIME_SCHEDULES
+    ]);
+
+    let actualLimit = baseLimit;
+    if (timeSchedulesEnabled && timeSchedules) {
+        const multiplier = getCurrentScheduleMultiplier(timeSchedules);
+        actualLimit = Math.floor(baseLimit * multiplier);
+    }
 
     const usage = dailyUsage[domain] || 0;
 
     // Debug
-    // console.log(`Checking limit for ${domain}: ${usage}/${limit}`);
+    // console.log(`Checking limit for ${domain}: ${usage}/${actualLimit}`);
 
-    if (usage > limit) {
+    if (usage > actualLimit) {
         // If tabId not provided, verify we are targeting the CURRENT active tab
         let targetTabId = tabId;
         if (!targetTabId) {
@@ -742,7 +738,7 @@ async function checkLimitAndShowOverlay(domain, tabId = null) {
                     type: 'GUARDIAN_SHOW_OVERLAY',
                     payload: {
                         timeSpent: usage,
-                        limit: limit,
+                        limit: actualLimit,
                         domain: domain
                     }
                 }).catch(() => {
@@ -774,18 +770,32 @@ async function checkGuardianLimit({ domain }) {
     if (!timeGuardianEnabled) return { blocked: false };
 
     const usage = dailyUsage[domain] || 0;
-    const limit = guardianLimits.overrides[domain] !== undefined
+
+    // Get base limit
+    let baseLimit = guardianLimits.overrides[domain] !== undefined
         ? guardianLimits.overrides[domain]
         : guardianLimits.global;
 
-    if (usage > limit) {
+    // Apply time-based scheduling if enabled
+    const { timeSchedulesEnabled, timeSchedules } = await chrome.storage.local.get([
+        STORAGE_KEYS.TIME_SCHEDULES_ENABLED,
+        STORAGE_KEYS.TIME_SCHEDULES
+    ]);
+
+    let actualLimit = baseLimit;
+    if (timeSchedulesEnabled && timeSchedules) {
+        const multiplier = getCurrentScheduleMultiplier(timeSchedules);
+        actualLimit = Math.floor(baseLimit * multiplier);
+    }
+
+    if (usage > actualLimit) {
         const graceKey = `grace_${domain}`;
         const { [graceKey]: graceTime } = await chrome.storage.local.get(graceKey);
 
         if (graceTime && Date.now() < graceTime) {
             return { blocked: false };
         }
-        return { blocked: true, timeSpent: usage, limit };
+        return { blocked: true, timeSpent: usage, limit: actualLimit };
     }
     return { blocked: false };
 }

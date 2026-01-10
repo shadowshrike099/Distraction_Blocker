@@ -29,6 +29,7 @@
         "*://*.instagram.com/*"
       ],
       "js": [
+        "config.js",
         "content/content.js"
       ],
       "css": [
@@ -48,6 +49,7 @@
         "*://*.netflix.com/*"
       ],
       "js": [
+        "config.js",
         "content/guardian.js"
       ],
       "run_at": "document_start"

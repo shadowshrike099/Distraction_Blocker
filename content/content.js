@@ -1,46 +1,5 @@
 // content.js - Content script for Cognitive Defense extension
-
-// Configuration for different sites
-const SITE_CONFIGS = {
-    'youtube.com': {
-        selectors: [
-            '#contents.ytd-rich-grid-renderer', // Main feed
-            '#secondary-inner', // Watch page sidebar recommendations
-            '#related', // Related videos
-            'ytd-watch-next-secondary-results-renderer', // Sidebar alternative
-            'ytd-reel-shelf-renderer', // Shorts in feed
-            'ytd-rich-section-renderer', // Shorts shelf (modern)
-            '#shorts-container', // Shorts section
-            '#comments', // Comments section
-            'ytd-comments', // Comments component
-            '[page-subtype="home"] #contents' // General home feed backup
-        ],
-        actions: ['hide']
-    },
-    'tiktok.com': {
-        selectors: [
-            '[data-e2e="recommend-list-item-container"]', // Video containers
-            '[data-e2e="nav-explore"]', // Explore tab
-            '[data-e2e="feed-video"]', // Main feed video
-            '.DivItemContainer', // Item containers
-            '[data-e2e="comment-list"]', // Comments
-            '#main-content-homepage_hot', // Hot feed
-        ],
-        actions: ['hide', 'disableInfiniteScroll']
-    },
-    'instagram.com': {
-        selectors: [
-            '[data-testid="explore-all-unit"]', // Explore section
-            'article[role="presentation"]', // Post containers
-            'article', // Generic posts
-            '[data-testid="reels-tray-container"]', // Reels tray
-            'div[role="tablist"] a[href*="/reels/"]', // Reels tab
-            'a[href*="/explore/"]', // Explore links
-            'main[role="main"] > div > div > div' // Feed container generic
-        ],
-        actions: ['hide']
-    }
-};
+// SITE_CONFIGS is loaded from config.js (included in manifest.json)
 
 // Global state
 let isFocusModeActive = false;
