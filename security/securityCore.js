@@ -29,15 +29,30 @@ async function initializeSecurity() {
   try {
     console.log('[Security] Initializing security modules...');
 
-    // Load whitelist and stats from storage
+    // Load whitelist, stats, and settings from storage
     const stored = await chrome.storage.local.get([
       SECURITY_STORAGE_KEYS.WHITELIST,
-      SECURITY_STORAGE_KEYS.STATS
+      SECURITY_STORAGE_KEYS.STATS,
+      SECURITY_STORAGE_KEYS.SETTINGS
     ]);
 
     securityWhitelist = stored[SECURITY_STORAGE_KEYS.WHITELIST] || [];
     if (stored[SECURITY_STORAGE_KEYS.STATS]) {
       securityStats = stored[SECURITY_STORAGE_KEYS.STATS];
+    }
+
+    // Initialize default security settings if not present
+    if (!stored[SECURITY_STORAGE_KEYS.SETTINGS]) {
+      const defaultSettings = {
+        features: SECURITY_FEATURES,
+        contentCategories: DEFAULT_CONTENT_SETTINGS,
+        privacy: DEFAULT_PRIVACY_SETTINGS,
+        alerts: DEFAULT_ALERT_SETTINGS
+      };
+      await chrome.storage.local.set({
+        [SECURITY_STORAGE_KEYS.SETTINGS]: defaultSettings
+      });
+      console.log('[Security] Default settings initialized');
     }
 
     // Initialize all modules in parallel
@@ -55,8 +70,8 @@ async function initializeSecurity() {
       securityInitialized = true;
       console.log('[Security] All security modules initialized successfully');
 
-      // Set up tracker blocking rules
-      await updateBlockingRules({});
+      // Note: Tracker blocking is handled by the privacyShield module
+      // The main updateBlockingRules is managed by background.js for site blocking
     } else {
       console.warn('[Security] Some modules failed to initialize');
     }

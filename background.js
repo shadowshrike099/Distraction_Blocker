@@ -944,8 +944,31 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
 
         const result = await analyzeUrlSecurity(details.url);
 
-        if (result.recommendation === 'BLOCK' || result.recommendation === 'WARN') {
-            // Show warning overlay
+        if (result.recommendation === 'BLOCK') {
+            // Auto-add to blocklist and block the site
+            await autoAddToBlocklist(details.url, result);
+
+            // Show notification
+            chrome.notifications.create({
+                type: 'basic',
+                iconUrl: 'icons/icon128.png',
+                title: '🚨 Threat Blocked',
+                message: `Blocked: ${new URL(details.url).hostname}\nReason: ${result.flags[0]?.detail || 'Security threat detected'}`,
+                priority: 2,
+                requireInteraction: true
+            });
+
+            // Redirect to a blocked page
+            chrome.tabs.update(details.tabId, {
+                url: chrome.runtime.getURL('blocked.html') + '?url=' + encodeURIComponent(details.url) + '&reason=' + encodeURIComponent(result.flags[0]?.detail || 'Security threat')
+            });
+
+            // Log the alert
+            if (typeof logSecurityAlert === 'function') {
+                await logSecurityAlert(result);
+            }
+        } else if (result.recommendation === 'WARN') {
+            // Show warning overlay for warnings
             if (typeof showThreatWarning === 'function') {
                 showThreatWarning(details.tabId, result);
             }
@@ -962,6 +985,53 @@ chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
         console.warn('Security analysis error:', e);
     }
 });
+
+/**
+ * Auto-add detected threat to the blocklist
+ * @param {string} url - URL that was detected as threat
+ * @param {Object} threatData - Threat analysis data
+ */
+async function autoAddToBlocklist(url, threatData) {
+    try {
+        const urlObj = new URL(url);
+        const domain = urlObj.hostname.replace(/^www\./, '');
+
+        // Get current blocked sites from options
+        const { optionsBlockedSites = [] } = await chrome.storage.local.get('optionsBlockedSites');
+
+        // Check if already blocked
+        if (optionsBlockedSites.some(site => site.includes(domain))) {
+            console.log('[Security] Domain already in blocklist:', domain);
+            return;
+        }
+
+        // Add to blocked sites
+        optionsBlockedSites.push(domain);
+
+        await chrome.storage.local.set({ optionsBlockedSites: optionsBlockedSites });
+
+        // Update blocking rules if session is active or blocking is enabled
+        const { sessionEndTime, blockedSites = [], strictMode = false } = await chrome.storage.local.get([
+            'sessionEndTime', 'blockedSites', 'strictMode'
+        ]);
+
+        if (sessionEndTime && Date.now() < sessionEndTime) {
+            // Session is active, update the active blocklist too
+            blockedSites.push(domain);
+            await chrome.storage.local.set({ blockedSites: blockedSites });
+            updateBlockingRules(blockedSites, strictMode);
+        } else {
+            // No active session, just update DNR rules with the new site
+            updateBlockingRules([domain], false);
+        }
+
+        console.log('[Security] Auto-added to blocklist:', domain);
+        addSecurityLog('threat_auto_blocked', { domain, threatScore: threatData.threatScore, reason: threatData.flags[0]?.detail });
+
+    } catch (error) {
+        console.error('[Security] Failed to auto-add to blocklist:', error);
+    }
+}
 
 // Security handler functions
 async function handleSecurityAnalyzeUrl(payload) {

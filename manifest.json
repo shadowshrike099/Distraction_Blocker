@@ -68,7 +68,8 @@
   "web_accessible_resources": [{
     "resources": [
       "content/threatOverlay.css",
-      "data/*.json"
+      "data/*.json",
+      "blocked.html"
     ],
     "matches": ["<all_urls>"]
   }],

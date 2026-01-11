@@ -22,11 +22,24 @@ async function initContentFilter() {
     const stored = await chrome.storage.local.get(SECURITY_STORAGE_KEYS.SETTINGS);
     contentFilterSettings = stored[SECURITY_STORAGE_KEYS.SETTINGS]?.contentCategories || DEFAULT_CONTENT_SETTINGS;
 
-    console.log('[Security] Content Filter initialized successfully');
+    // Ensure adult filtering is enabled by default if not set
+    if (!contentFilterSettings.adult) {
+      contentFilterSettings.adult = { enabled: true, strictness: 'high' };
+    }
+
+    console.log('[Security] Content Filter initialized with settings:', JSON.stringify(contentFilterSettings));
     return true;
   } catch (error) {
     console.error('[Security] Failed to initialize Content Filter:', error);
-    return false;
+    // Use hardcoded defaults as fallback
+    contentFilterSettings = {
+      adult: { enabled: true, strictness: 'high' },
+      gambling: { enabled: false, strictness: 'medium' },
+      violence: { enabled: false, strictness: 'medium' },
+      drugs: { enabled: false, strictness: 'low' },
+      piracy: { enabled: false, strictness: 'low' }
+    };
+    return true; // Return true so other modules can still work
   }
 }
 
@@ -113,7 +126,7 @@ function analyzeUrlKeywords(url) {
       if (urlParts.includes(keyword) || urlLower.includes(keyword)) {
         result.matchedCategories.push('adult');
         result.matches.push({ category: 'adult', keyword });
-        result.score += strictness === 'high' ? 50 : 70;
+        result.score += strictness === 'high' ? 80 : 60;
       }
     }
   }
