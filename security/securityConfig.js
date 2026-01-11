@@ -121,21 +121,7 @@ const DEFAULT_ALERT_SETTINGS = {
   maxAlertHistory: 100
 };
 
-/**
- * Security storage keys
- * @constant {Object}
- */
-const SECURITY_STORAGE_KEYS = {
-  SETTINGS: 'securitySettings',
-  STATS: 'securityStats',
-  ALERTS: 'securityAlerts',
-  WHITELIST: 'securityWhitelist',
-  TRACKER_STATS: 'trackerStats',
-  THREATS_BLOCKED: 'threatsBlocked',
-  URLS_CLEANED: 'urlsCleaned',
-  PHISHING_BLOCKED: 'phishingBlocked',
-  CONTENT_BLOCKED: 'contentBlocked'
-};
+// Note: SECURITY_STORAGE_KEYS is defined in config.js to avoid duplication
 
 /**
  * Cache expiration times (in milliseconds)
@@ -166,6 +152,7 @@ const ENTROPY_THRESHOLD = 4.0;
 const MAX_DOMAIN_LENGTH = 50;
 
 // Export for use in other modules
+// Note: SECURITY_STORAGE_KEYS is exported from config.js
 if (typeof self !== 'undefined') {
   self.SECURITY_FEATURES = SECURITY_FEATURES;
   self.THREAT_THRESHOLDS = THREAT_THRESHOLDS;
@@ -176,7 +163,6 @@ if (typeof self !== 'undefined') {
   self.DEFAULT_CONTENT_SETTINGS = DEFAULT_CONTENT_SETTINGS;
   self.DEFAULT_PRIVACY_SETTINGS = DEFAULT_PRIVACY_SETTINGS;
   self.DEFAULT_ALERT_SETTINGS = DEFAULT_ALERT_SETTINGS;
-  self.SECURITY_STORAGE_KEYS = SECURITY_STORAGE_KEYS;
   self.CACHE_EXPIRY = CACHE_EXPIRY;
   self.TYPOSQUATTING_THRESHOLD = TYPOSQUATTING_THRESHOLD;
   self.ENTROPY_THRESHOLD = ENTROPY_THRESHOLD;
