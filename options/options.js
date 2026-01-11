@@ -5,7 +5,6 @@
 const OPTIONS_STORAGE_KEYS = {
     BLOCKED_SITES: STORAGE_KEYS.OPTIONS_BLOCKED_SITES,
     FOCUS_DURATION: STORAGE_KEYS.OPTIONS_FOCUS_DURATION,
-    STRICT_MODE: STORAGE_KEYS.OPTIONS_STRICT_MODE,
     EMERGENCY_CODE: STORAGE_KEYS.OPTIONS_EMERGENCY_CODE,
     MAX_ATTEMPTS: STORAGE_KEYS.OPTIONS_MAX_ATTEMPTS
 };
@@ -13,7 +12,6 @@ const OPTIONS_STORAGE_KEYS = {
 // Local state variables
 let blockedSites = [];
 let focusDuration = 25; // minutes
-let strictModeEnabled = false;
 let emergencyRules = { code: '', maxAttempts: 3 };
 let guardianLimits = { global: 10, overrides: {} };
 let dailyUsage = {};
@@ -43,19 +41,30 @@ const blocklist = document.getElementById('blocklist');
 const durationForm = document.getElementById('duration-form');
 const durationInput = document.getElementById('duration-input');
 const currentDuration = document.getElementById('current-duration');
-const strictToggle = document.getElementById('strict-toggle');
-const strictStatus = document.getElementById('strict-status');
 const emergencyForm = document.getElementById('emergency-form');
 const unlockCodeInput = document.getElementById('unlock-code');
+const unlockCodeConfirm = document.getElementById('unlock-code-confirm');
+const codeMatchStatus = document.getElementById('code-match-status');
 const maxAttemptsInput = document.getElementById('max-attempts');
 const emergencyStatus = document.getElementById('emergency-status');
+// Emergency unlock panel elements
+const sessionIndicator = document.getElementById('session-indicator');
+const sessionStatusText = document.getElementById('session-status-text');
+const emergencyUnlockPanel = document.getElementById('emergency-unlock-panel');
+const emergencyUnlockInput = document.getElementById('emergency-unlock-input');
+const emergencyUnlockBtn = document.getElementById('emergency-unlock-btn');
+const unlockAttemptsInfo = document.getElementById('unlock-attempts-info');
+const emergencyUnlockError = document.getElementById('emergency-unlock-error');
 const logsContainer = document.getElementById('logs-container');
 const refreshLogsBtn = document.getElementById('refresh-logs');
 const saveAllBtn = document.getElementById('save-all');
 const resetBtn = document.getElementById('reset');
+// Risk score elements
 const riskScoreEl = document.getElementById('risk-score');
 const scoreCircle = document.getElementById('score-circle');
+const scoreValue = document.getElementById('score-value');
 const riskDescription = document.getElementById('risk-description');
+const riskAdvice = document.getElementById('risk-advice');
 const refreshRiskBtn = document.getElementById('refresh-risk');
 const globalLimitInput = document.getElementById('global-limit');
 const saveGuardianLimitBtn = document.getElementById('save-guardian-limit');
@@ -78,6 +87,7 @@ async function init() {
     renderGuardianSettings();
     updateUI();
     checkSessionStatus();
+    updateEmergencyUnlockPanel();
 }
 
 async function checkSessionStatus() {
@@ -101,6 +111,10 @@ async function checkSessionStatus() {
 chrome.storage.onChanged.addListener((changes) => {
     if (changes.sessionEndTime) {
         checkSessionStatus();
+        updateEmergencyUnlockPanel();
+    }
+    if (changes.failedUnlockAttempts) {
+        updateEmergencyUnlockPanel();
     }
 });
 
@@ -183,28 +197,136 @@ function setDuration(e) {
     }
 }
 
-// Strict mode toggle
-function toggleStrictMode() {
-    strictModeEnabled = strictToggle.checked;
-    updateUI();
-    saveSetting(OPTIONS_STORAGE_KEYS.STRICT_MODE, strictModeEnabled);
-}
-
 // Emergency rules
 async function saveEmergencyRules(e) {
     e.preventDefault();
-    if (unlockCodeInput.value) {
-        const { hash, salt } = await hashPassword(unlockCodeInput.value);
+
+    const code = unlockCodeInput.value;
+    const confirmCode = unlockCodeConfirm.value;
+
+    // Check if codes match when setting a new code
+    if (code && code !== confirmCode) {
+        codeMatchStatus.textContent = 'Codes do not match';
+        codeMatchStatus.className = 'no-match';
+        return;
+    }
+
+    if (code) {
+        const { hash, salt } = await hashPassword(code);
         emergencyRules.code = hash;
         saveSetting('optionsEmergencyCodeSalt', salt);
+        codeMatchStatus.textContent = '';
     } else {
         emergencyRules.code = ''; // Allow clearing
         saveSetting('optionsEmergencyCodeSalt', null);
     }
-    emergencyRules.maxAttempts = parseInt(maxAttemptsInput.value);
+
+    emergencyRules.maxAttempts = parseInt(maxAttemptsInput.value) || 3;
     updateUI();
     saveSetting(OPTIONS_STORAGE_KEYS.EMERGENCY_CODE, emergencyRules.code);
     saveSetting(OPTIONS_STORAGE_KEYS.MAX_ATTEMPTS, emergencyRules.maxAttempts);
+
+    // Clear inputs
+    unlockCodeInput.value = '';
+    unlockCodeConfirm.value = '';
+
+    emergencyStatus.textContent = 'Settings saved successfully';
+    emergencyStatus.style.color = 'var(--success-color)';
+    setTimeout(() => {
+        emergencyStatus.textContent = emergencyRules.code ? 'Master code configured' : '';
+    }, 2000);
+}
+
+// Emergency unlock panel functionality
+async function updateEmergencyUnlockPanel() {
+    const { sessionEndTime, failedUnlockAttempts = 0, maxAttempts = 3 } = await chrome.storage.local.get([
+        'sessionEndTime',
+        STORAGE_KEYS.FAILED_UNLOCK_ATTEMPTS,
+        STORAGE_KEYS.MAX_ATTEMPTS
+    ]);
+
+    const hasActiveSession = sessionEndTime && Date.now() < sessionEndTime;
+
+    if (hasActiveSession) {
+        const remaining = sessionEndTime - Date.now();
+        const mins = Math.floor(remaining / 60000);
+        const secs = Math.floor((remaining % 60000) / 1000);
+
+        sessionIndicator.className = 'active';
+        sessionStatusText.textContent = `Active session - ${mins}m ${secs}s remaining`;
+        emergencyUnlockPanel.style.display = 'block';
+
+        const attemptsLeft = maxAttempts - failedUnlockAttempts;
+        if (attemptsLeft > 0) {
+            unlockAttemptsInfo.innerHTML = `<span style="color: var(--warning-color);">${attemptsLeft} attempt(s) remaining</span>`;
+        } else {
+            unlockAttemptsInfo.innerHTML = `<span style="color: var(--danger-color);">Maximum attempts exceeded. Wait for session to end.</span>`;
+            emergencyUnlockBtn.disabled = true;
+            emergencyUnlockInput.disabled = true;
+        }
+    } else {
+        sessionIndicator.className = '';
+        sessionStatusText.textContent = 'No active session';
+        emergencyUnlockPanel.style.display = 'none';
+    }
+}
+
+async function performEmergencyUnlock() {
+    const password = emergencyUnlockInput.value;
+    if (!password) {
+        emergencyUnlockError.textContent = 'Please enter your master code';
+        emergencyUnlockError.style.display = 'block';
+        return;
+    }
+
+    emergencyUnlockBtn.disabled = true;
+    emergencyUnlockBtn.textContent = 'Unlocking...';
+
+    chrome.runtime.sendMessage({
+        type: 'EMERGENCY_UNLOCK',
+        payload: { password }
+    }, (response) => {
+        if (response && response.success) {
+            emergencyUnlockError.style.display = 'none';
+            emergencyUnlockInput.value = '';
+            updateEmergencyUnlockPanel();
+            checkSessionStatus();
+
+            // Show success message
+            sessionStatusText.textContent = 'Session ended successfully';
+            sessionIndicator.className = '';
+        } else {
+            emergencyUnlockError.textContent = response?.error || 'Invalid code. Please try again.';
+            emergencyUnlockError.style.display = 'block';
+            emergencyUnlockInput.value = '';
+            updateEmergencyUnlockPanel();
+        }
+
+        emergencyUnlockBtn.disabled = false;
+        emergencyUnlockBtn.textContent = 'Unlock Now';
+    });
+}
+
+// Code confirmation matching
+function checkCodeMatch() {
+    const code = unlockCodeInput.value;
+    const confirmCode = unlockCodeConfirm.value;
+
+    if (!code && !confirmCode) {
+        codeMatchStatus.textContent = '';
+        codeMatchStatus.className = '';
+        return;
+    }
+
+    if (code && confirmCode) {
+        if (code === confirmCode) {
+            codeMatchStatus.textContent = 'Codes match';
+            codeMatchStatus.className = 'match';
+        } else {
+            codeMatchStatus.textContent = 'Codes do not match';
+            codeMatchStatus.className = 'no-match';
+        }
+    }
 }
 
 // Hash password/code
@@ -279,29 +401,189 @@ function refreshLogs() {
 }
 
 // Risk score
-function renderRiskScore() {
-    chrome.runtime.sendMessage({ type: 'GET_RISK_SCORE' }, (response) => {
-        if (response.success) {
-            const score = response.score;
-            scoreCircle.textContent = score;
-            scoreCircle.style.background = `conic-gradient(#007acc 0% ${score}%, #e0e0e0 ${score}% 100%)`;
+async function renderRiskScore() {
+    // Fetch detailed risk data
+    const [riskResponse, logsResponse] = await Promise.all([
+        new Promise(resolve => chrome.runtime.sendMessage({ type: 'GET_RISK_SCORE' }, resolve)),
+        new Promise(resolve => chrome.runtime.sendMessage({ type: 'GET_LOGS' }, resolve))
+    ]);
 
-            let riskLevel = 'low-risk';
-            let description = 'Low risk - Good focus habits';
-            if (score >= 70) {
-                riskLevel = 'high-risk';
-                description = 'High risk - Consider adjusting habits';
-            } else if (score >= 40) {
-                riskLevel = 'medium-risk';
-                description = 'Medium risk - Monitor behavior';
-            }
+    const { sessionEndTime, sessionTotalDuration, failedUnlockAttempts = 0 } = await chrome.storage.local.get([
+        'sessionEndTime',
+        'sessionTotalDuration',
+        STORAGE_KEYS.FAILED_UNLOCK_ATTEMPTS
+    ]);
 
-            scoreCircle.className = `score-circle ${riskLevel}`;
-            riskDescription.textContent = description;
-        } else {
-            riskDescription.textContent = 'Failed to calculate risk score';
+    if (riskResponse && riskResponse.success) {
+        const score = riskResponse.score;
+
+        // Update main score display
+        if (scoreValue) scoreValue.textContent = score;
+        scoreCircle.style.setProperty('--score-percent', `${score}%`);
+
+        let riskLevel = 'low-risk';
+        let description = 'Low Risk';
+        let advice = 'Great job! Your focus habits are healthy. Keep maintaining your current routine.';
+
+        if (score >= 70) {
+            riskLevel = 'high-risk';
+            description = 'High Risk';
+            advice = 'Your distraction patterns suggest difficulty focusing. Consider shorter sessions, removing more sites from blocklist, or using strict schedules.';
+        } else if (score >= 40) {
+            riskLevel = 'medium-risk';
+            description = 'Medium Risk';
+            advice = 'You show some distraction tendencies. Try to complete full sessions and avoid accessing blocked sites during focus time.';
         }
+
+        scoreCircle.className = `score-circle ${riskLevel}`;
+        riskDescription.textContent = description;
+        if (riskAdvice) riskAdvice.textContent = advice;
+
+        // Calculate individual factors for breakdown
+        const logs = logsResponse?.logs || [];
+        const now = new Date();
+        const last24h = logs.filter(log => {
+            const logTime = new Date(log.timestamp);
+            return (now - logTime) < (24 * 60 * 60 * 1000);
+        });
+        const last3Days = logs.filter(log => {
+            const logTime = new Date(log.timestamp);
+            return (now - logTime) < (72 * 60 * 60 * 1000);
+        });
+
+        // Factor 1: Blocked attempts
+        const blockedAttempts = last24h.filter(log => log.event === 'site_blocked').length;
+        const blockedScore = Math.min(blockedAttempts * 10, 30);
+        updateRiskFactor('blocked', blockedScore, 30);
+
+        // Factor 2: Time of day
+        const hour = now.getHours();
+        const timeScore = (hour >= 22 || hour <= 5) ? 20 : 0;
+        updateRiskFactor('time', timeScore, 20);
+
+        // Factor 3: Session quality
+        let sessionScore = 0;
+        if (sessionEndTime && Date.now() < sessionEndTime && sessionTotalDuration) {
+            const durationMins = sessionTotalDuration / (60 * 1000);
+            if (durationMins < 10) {
+                sessionScore = 15;
+            } else if (durationMins >= 45) {
+                sessionScore = -10; // This is a bonus
+            }
+        }
+        updateRiskFactor('session', Math.max(0, sessionScore), 15);
+
+        // Factor 4: Failed unlocks
+        const unlockScore = Math.min(failedUnlockAttempts * 15, 45);
+        updateRiskFactor('unlock', unlockScore, 45);
+
+        // Factor 5: Consistency bonus
+        const completedSessions = last3Days.filter(log => log.event === 'session_ended').length;
+        let consistencyBonus = 0;
+        if (completedSessions >= 5) {
+            consistencyBonus = 15;
+        } else if (completedSessions >= 2) {
+            consistencyBonus = 5;
+        }
+        updateRiskFactor('consistency', consistencyBonus, 15, true);
+
+        // Update statistics
+        updateFocusStatistics(logs, last24h, last3Days, completedSessions);
+
+    } else {
+        riskDescription.textContent = 'Failed to calculate risk score';
+        if (riskAdvice) riskAdvice.textContent = '';
+    }
+}
+
+function updateRiskFactor(factorId, points, maxPoints, isBonus = false) {
+    const scoreEl = document.getElementById(`factor-${factorId}-score`);
+    const fillEl = document.getElementById(`factor-${factorId}-fill`);
+
+    if (scoreEl && fillEl) {
+        const percentage = Math.abs(points) / maxPoints * 100;
+        fillEl.style.width = `${Math.min(percentage, 100)}%`;
+
+        if (isBonus) {
+            scoreEl.textContent = points > 0 ? `-${points} pts` : '0 pts';
+            scoreEl.className = 'risk-factor-score bonus';
+        } else {
+            scoreEl.textContent = `+${points} pts`;
+            scoreEl.className = 'risk-factor-score';
+        }
+    }
+}
+
+function updateFocusStatistics(allLogs, last24h, last3Days, completedSessions) {
+    // Sessions completed in 3 days
+    const sessionsCompletedEl = document.getElementById('stat-sessions-completed');
+    if (sessionsCompletedEl) sessionsCompletedEl.textContent = completedSessions;
+
+    // Sites blocked today
+    const blockedTodayEl = document.getElementById('stat-blocked-today');
+    if (blockedTodayEl) {
+        const blockedToday = last24h.filter(log => log.event === 'site_blocked').length;
+        blockedTodayEl.textContent = blockedToday;
+    }
+
+    // Current streak (consecutive days with completed sessions)
+    const streakEl = document.getElementById('stat-current-streak');
+    if (streakEl) {
+        const streak = calculateStreak(allLogs);
+        streakEl.textContent = streak;
+    }
+
+    // Average session length
+    const avgSessionEl = document.getElementById('stat-avg-session');
+    if (avgSessionEl) {
+        const sessionStarts = last3Days.filter(log => log.event === 'session_started');
+        if (sessionStarts.length > 0) {
+            // Calculate average from details if available
+            let totalMins = 0;
+            let count = 0;
+            sessionStarts.forEach(log => {
+                if (log.details && log.details.duration) {
+                    totalMins += log.details.duration;
+                    count++;
+                }
+            });
+            if (count > 0) {
+                avgSessionEl.textContent = `${Math.round(totalMins / count)}m`;
+            } else {
+                avgSessionEl.textContent = '--';
+            }
+        } else {
+            avgSessionEl.textContent = '--';
+        }
+    }
+}
+
+function calculateStreak(logs) {
+    // Get unique days with completed sessions
+    const sessionDays = new Set();
+    logs.filter(log => log.event === 'session_ended').forEach(log => {
+        const date = new Date(log.timestamp).toDateString();
+        sessionDays.add(date);
     });
+
+    // Check consecutive days from today
+    let streak = 0;
+    const today = new Date();
+
+    for (let i = 0; i < 365; i++) {
+        const checkDate = new Date(today);
+        checkDate.setDate(today.getDate() - i);
+        const dateStr = checkDate.toDateString();
+
+        if (sessionDays.has(dateStr)) {
+            streak++;
+        } else if (i > 0) {
+            // Skip today if no session yet, but break on past days without sessions
+            break;
+        }
+    }
+
+    return streak;
 }
 
 function refreshRiskScore() {
@@ -311,9 +593,9 @@ function refreshRiskScore() {
 // UI updates
 function updateUI() {
     currentDuration.textContent = `Current: ${focusDuration} minutes`;
-    strictStatus.textContent = strictModeEnabled ? 'Enabled' : 'Disabled';
-    strictStatus.className = `status-indicator ${strictModeEnabled ? 'enabled' : 'disabled'}`;
-    emergencyStatus.textContent = emergencyRules.code ? 'Rules configured (Hashed)' : 'No rules set';
+    emergencyStatus.textContent = emergencyRules.code ? 'Master code configured' : '';
+    emergencyStatus.style.color = emergencyRules.code ? 'var(--success-color)' : 'var(--text-secondary)';
+    maxAttemptsInput.value = emergencyRules.maxAttempts;
 }
 
 // Settings persistence
@@ -322,14 +604,11 @@ async function loadSettings() {
         const result = await chrome.storage.local.get([
             OPTIONS_STORAGE_KEYS.BLOCKED_SITES,
             OPTIONS_STORAGE_KEYS.FOCUS_DURATION,
-            OPTIONS_STORAGE_KEYS.STRICT_MODE,
             OPTIONS_STORAGE_KEYS.EMERGENCY_CODE,
             OPTIONS_STORAGE_KEYS.MAX_ATTEMPTS
         ]);
         blockedSites = result[OPTIONS_STORAGE_KEYS.BLOCKED_SITES] || [];
         focusDuration = result[OPTIONS_STORAGE_KEYS.FOCUS_DURATION] || 25;
-        strictModeEnabled = result[OPTIONS_STORAGE_KEYS.STRICT_MODE] || false;
-        emergencyRules.code = result[OPTIONS_STORAGE_KEYS.EMERGENCY_CODE] || '';
         emergencyRules.code = result[OPTIONS_STORAGE_KEYS.EMERGENCY_CODE] || '';
         emergencyRules.maxAttempts = result[OPTIONS_STORAGE_KEYS.MAX_ATTEMPTS] || 3;
 
@@ -355,7 +634,6 @@ async function saveAllSettings() {
         await chrome.storage.local.set({
             [OPTIONS_STORAGE_KEYS.BLOCKED_SITES]: blockedSites,
             [OPTIONS_STORAGE_KEYS.FOCUS_DURATION]: focusDuration,
-            [OPTIONS_STORAGE_KEYS.STRICT_MODE]: strictModeEnabled,
             [OPTIONS_STORAGE_KEYS.EMERGENCY_CODE]: emergencyRules.code,
             [OPTIONS_STORAGE_KEYS.MAX_ATTEMPTS]: emergencyRules.maxAttempts
         });
@@ -369,7 +647,6 @@ async function resetSettings() {
     if (confirm('Reset all settings to defaults?')) {
         blockedSites = [];
         focusDuration = 25;
-        strictModeEnabled = false;
         emergencyRules = { code: '', maxAttempts: 3 };
         renderBlocklist();
         updateUI();
@@ -379,7 +656,6 @@ async function resetSettings() {
             await chrome.storage.local.remove([
                 OPTIONS_STORAGE_KEYS.BLOCKED_SITES,
                 OPTIONS_STORAGE_KEYS.FOCUS_DURATION,
-                OPTIONS_STORAGE_KEYS.STRICT_MODE,
                 OPTIONS_STORAGE_KEYS.EMERGENCY_CODE,
                 OPTIONS_STORAGE_KEYS.MAX_ATTEMPTS
             ]);
@@ -403,11 +679,19 @@ function setupEventListeners() {
     });
 
     durationForm.addEventListener('submit', setDuration);
-    strictToggle.addEventListener('change', toggleStrictMode);
     emergencyForm.addEventListener('submit', saveEmergencyRules);
+
+    // Emergency unlock panel listeners
+    if (emergencyUnlockBtn) {
+        emergencyUnlockBtn.addEventListener('click', performEmergencyUnlock);
+    }
+    if (unlockCodeInput && unlockCodeConfirm) {
+        unlockCodeInput.addEventListener('input', checkCodeMatch);
+        unlockCodeConfirm.addEventListener('input', checkCodeMatch);
+    }
+
     refreshLogsBtn.addEventListener('click', refreshLogs);
     saveAllBtn.addEventListener('click', saveAllSettings);
-    resetBtn.addEventListener('click', resetSettings);
     resetBtn.addEventListener('click', resetSettings);
     refreshRiskBtn.addEventListener('click', refreshRiskScore);
     saveGuardianLimitBtn.addEventListener('click', saveGuardianLimit);

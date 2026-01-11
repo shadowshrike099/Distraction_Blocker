@@ -19,7 +19,6 @@
             <button class="tab-btn active" data-tab="blocklist">Blocklist</button>
             <button class="tab-btn" data-tab="guardian">Time Guardian</button>
             <button class="tab-btn" data-tab="duration">Duration</button>
-            <button class="tab-btn" data-tab="modes">Strict Mode</button>
             <button class="tab-btn" data-tab="emergency">Security</button>
             <button class="tab-btn" data-tab="logs">Audit Logs</button>
             <button class="tab-btn" data-tab="risk">Risk Score</button>
@@ -104,40 +103,68 @@
                     minutes</p>
             </section>
 
-            <section id="modes-tab" class="tab-content">
-                <h2>Strict Mode Configuration</h2>
-                <div
-                    style="background: rgba(0,0,0,0.2); padding: 20px; border-radius: 12px; border: 1px solid var(--glass-border);">
-                    <label for="strict-toggle" class="toggle-label">
-                        <input type="checkbox" id="strict-toggle" class="toggle">
-                        <span class="toggle-slider"></span>
-                        <div style="display: flex; flex-direction: column;">
-                            <span style="font-weight: 500;">Enable Strict Blocking</span>
-                            <span style="font-size: 12px; color: var(--text-secondary);">Prevents all access to major
-                                social media platforms regardless of blocklist.</span>
-                        </div>
-                    </label>
-                </div>
-                <div id="strict-status" style="margin-top: 16px; font-size: 14px;">Status: Disabled</div>
-            </section>
-
             <section id="emergency-tab" class="tab-content">
-                <h2>Emergency Unlock Rules</h2>
-                <p style="margin-bottom: 20px; color: var(--text-secondary); font-size: 13px;">
-                    Set a Master Unlock Code. This code can be used to emergency stop any session. It is stored securely
-                    (hashed).
+                <h2>Emergency Unlock</h2>
+                <p style="margin-bottom: 24px; color: var(--text-secondary); font-size: 13px;">
+                    Configure emergency unlock settings for when you need to end a session but forgot your password.
                 </p>
-                <form id="emergency-form">
-                    <label style="display: block; margin-bottom: 8px;">Master Unlock Code</label>
-                    <input type="password" id="unlock-code" placeholder="Enter new master code">
 
-                    <label style="display: block; margin-bottom: 8px; margin-top: 16px;">Max Unlock Attempts</label>
-                    <input type="number" id="max-attempts" min="1" max="10" value="3">
+                <!-- Current Session Status -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3>Current Session Status</h3>
+                    <div id="session-status-display" style="display: flex; align-items: center; gap: 12px;">
+                        <div id="session-indicator" style="width: 12px; height: 12px; border-radius: 50%; background: #94a3b8;"></div>
+                        <span id="session-status-text" style="font-size: 14px;">No active session</span>
+                    </div>
+                    <div id="emergency-unlock-panel" style="margin-top: 16px; display: none;">
+                        <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 12px;">
+                            Enter your master unlock code to end the current session immediately.
+                        </p>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="password" id="emergency-unlock-input" placeholder="Enter master code" style="flex: 1; margin-bottom: 0;">
+                            <button id="emergency-unlock-btn" class="btn primary">Unlock Now</button>
+                        </div>
+                        <div id="unlock-attempts-info" style="margin-top: 12px; font-size: 12px; color: var(--text-secondary);">
+                            <!-- Shows remaining attempts -->
+                        </div>
+                        <p id="emergency-unlock-error" style="margin-top: 8px; font-size: 13px; color: var(--danger-color); display: none;"></p>
+                    </div>
+                </div>
 
-                    <button type="submit" class="btn primary" style="margin-top: 24px;">Update Security Rules</button>
-                </form>
-                <p id="emergency-status" style="margin-top: 16px; font-size: 13px; color: var(--success-color);">No
-                    rules set</p>
+                <!-- Master Code Configuration -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3>Master Unlock Code</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+                        This code can be used to end any focus session in case of emergency. It is stored securely using PBKDF2 hashing.
+                    </p>
+                    <form id="emergency-form">
+                        <label style="display: block; margin-bottom: 8px; font-size: 14px;">New Master Code</label>
+                        <input type="password" id="unlock-code" placeholder="Enter new master code" style="margin-bottom: 8px;">
+                        <input type="password" id="unlock-code-confirm" placeholder="Confirm master code">
+                        <p id="code-match-status" style="font-size: 12px; margin-top: 4px; margin-bottom: 16px;"></p>
+
+                        <label style="display: block; margin-bottom: 8px; font-size: 14px;">Max Unlock Attempts per Session</label>
+                        <input type="number" id="max-attempts" min="1" max="10" value="3" style="width: 100px;">
+                        <span style="color: var(--text-secondary); font-size: 13px; margin-left: 8px;">attempts before lockout</span>
+
+                        <div style="margin-top: 24px; display: flex; gap: 12px; align-items: center;">
+                            <button type="submit" class="btn primary">Save Settings</button>
+                            <span id="emergency-status" style="font-size: 13px;"></span>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Help Section -->
+                <div class="card">
+                    <h3>How Emergency Unlock Works</h3>
+                    <ul style="color: var(--text-secondary); font-size: 13px; padding-left: 20px; margin: 0;">
+                        <li style="margin-bottom: 8px;">When you start a focus session, you set a session-specific password</li>
+                        <li style="margin-bottom: 8px;">If you forget that password, use your master unlock code instead</li>
+                        <li style="margin-bottom: 8px;">You have a limited number of attempts to prevent brute-forcing</li>
+                        <li style="margin-bottom: 8px;">If max attempts are exceeded, wait for the session to end naturally</li>
+                        <li>The master code is never stored in plain text - only a secure hash</li>
+                    </ul>
+                </div>
             </section>
 
             <section id="logs-tab" class="tab-content">
@@ -157,14 +184,103 @@
 
             <section id="risk-tab" class="tab-content">
                 <h2>Behavioral Risk Analysis</h2>
+
+                <!-- Main Score Display -->
                 <div id="risk-score" class="risk-display">
                     <div class="score-circle" id="score-circle">
-                        <span class="score-value">0</span>
+                        <span class="score-value" id="score-value">0</span>
                     </div>
                     <p id="risk-description" style="font-size: 18px; font-weight: 500;">Calculating...</p>
+                    <p id="risk-advice" style="font-size: 13px; color: var(--text-secondary); max-width: 400px; text-align: center; margin-top: 8px;"></p>
                 </div>
-                <div style="text-align: center;">
+
+                <div style="text-align: center; margin-bottom: 32px;">
                     <button id="refresh-risk" class="btn secondary">Analyze Now</button>
+                </div>
+
+                <!-- Risk Factors Breakdown -->
+                <div class="card" style="margin-bottom: 24px;">
+                    <h3>Risk Factor Breakdown</h3>
+                    <div id="risk-factors-container">
+                        <!-- Risk factors will be populated by JS -->
+                        <div class="risk-factor-item" id="factor-blocked-attempts">
+                            <div class="risk-factor-header">
+                                <span class="risk-factor-name">Blocked Site Attempts</span>
+                                <span class="risk-factor-score" id="factor-blocked-score">0 pts</span>
+                            </div>
+                            <div class="risk-factor-bar">
+                                <div class="risk-factor-fill" id="factor-blocked-fill" style="width: 0%;"></div>
+                            </div>
+                            <p class="risk-factor-desc">Attempts to visit blocked sites in last 24 hours</p>
+                        </div>
+
+                        <div class="risk-factor-item" id="factor-time-of-day">
+                            <div class="risk-factor-header">
+                                <span class="risk-factor-name">Time of Day</span>
+                                <span class="risk-factor-score" id="factor-time-score">0 pts</span>
+                            </div>
+                            <div class="risk-factor-bar">
+                                <div class="risk-factor-fill" id="factor-time-fill" style="width: 0%;"></div>
+                            </div>
+                            <p class="risk-factor-desc">Late night usage (10 PM - 5 AM) increases risk</p>
+                        </div>
+
+                        <div class="risk-factor-item" id="factor-session-quality">
+                            <div class="risk-factor-header">
+                                <span class="risk-factor-name">Session Quality</span>
+                                <span class="risk-factor-score" id="factor-session-score">0 pts</span>
+                            </div>
+                            <div class="risk-factor-bar">
+                                <div class="risk-factor-fill" id="factor-session-fill" style="width: 0%;"></div>
+                            </div>
+                            <p class="risk-factor-desc">Short sessions add risk, long sessions reduce it</p>
+                        </div>
+
+                        <div class="risk-factor-item" id="factor-failed-unlocks">
+                            <div class="risk-factor-header">
+                                <span class="risk-factor-name">Failed Unlock Attempts</span>
+                                <span class="risk-factor-score" id="factor-unlock-score">0 pts</span>
+                            </div>
+                            <div class="risk-factor-bar">
+                                <div class="risk-factor-fill" id="factor-unlock-fill" style="width: 0%;"></div>
+                            </div>
+                            <p class="risk-factor-desc">Attempts to bypass session protection</p>
+                        </div>
+
+                        <div class="risk-factor-item" id="factor-consistency">
+                            <div class="risk-factor-header">
+                                <span class="risk-factor-name">Consistency Bonus</span>
+                                <span class="risk-factor-score" id="factor-consistency-score">0 pts</span>
+                            </div>
+                            <div class="risk-factor-bar bonus">
+                                <div class="risk-factor-fill bonus" id="factor-consistency-fill" style="width: 0%;"></div>
+                            </div>
+                            <p class="risk-factor-desc">Completing sessions regularly reduces risk</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistics Summary -->
+                <div class="card">
+                    <h3>Focus Statistics</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px;">
+                        <div class="stat-box">
+                            <span class="stat-box-value" id="stat-sessions-completed">0</span>
+                            <span class="stat-box-label">Sessions Completed (3 days)</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-box-value" id="stat-blocked-today">0</span>
+                            <span class="stat-box-label">Sites Blocked Today</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-box-value" id="stat-current-streak">0</span>
+                            <span class="stat-box-label">Current Streak (days)</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-box-value" id="stat-avg-session">--</span>
+                            <span class="stat-box-label">Avg Session Length</span>
+                        </div>
+                    </div>
                 </div>
             </section>
 
