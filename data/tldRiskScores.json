@@ -1,0 +1,63 @@
+{
+  "description": "Top-Level Domain risk scoring for URL analysis",
+  "highRisk": {
+    "score": 25,
+    "tlds": [
+      ".tk", ".ml", ".ga", ".cf", ".gq",
+      ".xyz", ".top", ".work", ".click", ".link",
+      ".info", ".biz", ".online", ".site", ".website",
+      ".space", ".fun", ".icu", ".buzz", ".monster",
+      ".quest", ".beauty", ".hair", ".skin", ".makeup",
+      ".boats", ".stream", ".download", ".racing", ".accountant",
+      ".date", ".faith", ".review", ".science", ".party",
+      ".bid", ".trade", ".webcam", ".cricket", ".win",
+      ".loan", ".men", ".zip", ".mov"
+    ],
+    "reason": "Frequently used for phishing and malware due to free/cheap registration"
+  },
+  "mediumRisk": {
+    "score": 15,
+    "tlds": [
+      ".co", ".cc", ".ws", ".pw", ".to",
+      ".me", ".mobi", ".club", ".tech", ".store",
+      ".shop", ".app", ".dev", ".io", ".ai",
+      ".pro", ".life", ".live", ".world", ".today",
+      ".email", ".news", ".blog", ".cloud", ".digital"
+    ],
+    "reason": "Sometimes used legitimately but also for suspicious purposes"
+  },
+  "lowRisk": {
+    "score": 0,
+    "tlds": [
+      ".com", ".org", ".net", ".edu", ".gov",
+      ".mil", ".int"
+    ],
+    "reason": "Traditional TLDs with established trust"
+  },
+  "countryTlds": {
+    "trusted": {
+      "score": 0,
+      "tlds": [".us", ".uk", ".de", ".fr", ".jp", ".au", ".ca", ".eu", ".nz", ".ch", ".nl", ".se", ".no", ".fi", ".dk", ".at", ".be", ".ie", ".es", ".it", ".pt", ".pl", ".cz"]
+    },
+    "neutral": {
+      "score": 5,
+      "tlds": [".in", ".br", ".mx", ".ar", ".za", ".kr", ".sg", ".hk", ".tw", ".my", ".ph", ".id", ".th", ".vn", ".tr", ".ua", ".il", ".ae", ".sa"]
+    },
+    "elevated": {
+      "score": 10,
+      "tlds": [".ru", ".cn", ".su", ".by", ".kz", ".ir", ".pk", ".bd", ".ng", ".ke", ".gh", ".tz", ".ug", ".zw", ".cm", ".sn"]
+    }
+  },
+  "specialPurpose": {
+    "onion": {
+      "score": 30,
+      "tld": ".onion",
+      "reason": "Tor hidden service, often used for illicit purposes"
+    },
+    "bit": {
+      "score": 25,
+      "tld": ".bit",
+      "reason": "Namecoin blockchain domain, unregulated"
+    }
+  }
+}

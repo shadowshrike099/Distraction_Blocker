@@ -1,0 +1,320 @@
+{
+  "description": "Database of popular brands and their legitimate domains for impersonation detection",
+  "brands": [
+    {
+      "name": "Google",
+      "keywords": ["google", "gmail", "youtube", "android", "chrome"],
+      "legitimateDomains": ["google.com", "google.co.*", "gmail.com", "youtube.com", "accounts.google.com", "drive.google.com", "docs.google.com", "play.google.com", "cloud.google.com", "developers.google.com"],
+      "loginUrls": ["accounts.google.com/signin", "accounts.google.com/v3/signin"],
+      "priority": "critical"
+    },
+    {
+      "name": "Facebook",
+      "keywords": ["facebook", "fb", "meta", "messenger"],
+      "legitimateDomains": ["facebook.com", "fb.com", "messenger.com", "meta.com", "instagram.com", "whatsapp.com"],
+      "loginUrls": ["facebook.com/login", "m.facebook.com/login"],
+      "priority": "critical"
+    },
+    {
+      "name": "Amazon",
+      "keywords": ["amazon", "aws", "prime", "kindle", "alexa"],
+      "legitimateDomains": ["amazon.com", "amazon.co.*", "amazon.*", "aws.amazon.com", "signin.aws.amazon.com", "console.aws.amazon.com", "prime.amazon.com"],
+      "loginUrls": ["amazon.com/ap/signin", "www.amazon.com/ap/signin"],
+      "priority": "critical"
+    },
+    {
+      "name": "PayPal",
+      "keywords": ["paypal", "pay pal"],
+      "legitimateDomains": ["paypal.com", "paypal.me", "www.paypal.com"],
+      "loginUrls": ["paypal.com/signin", "www.paypal.com/signin"],
+      "priority": "critical"
+    },
+    {
+      "name": "Microsoft",
+      "keywords": ["microsoft", "outlook", "hotmail", "msn", "office", "azure", "xbox", "skype", "linkedin", "bing", "windows"],
+      "legitimateDomains": ["microsoft.com", "live.com", "outlook.com", "hotmail.com", "office.com", "office365.com", "azure.com", "xbox.com", "skype.com", "linkedin.com", "bing.com", "msn.com", "windows.com", "login.microsoftonline.com"],
+      "loginUrls": ["login.live.com", "login.microsoftonline.com"],
+      "priority": "critical"
+    },
+    {
+      "name": "Apple",
+      "keywords": ["apple", "icloud", "itunes", "iphone", "ipad", "mac"],
+      "legitimateDomains": ["apple.com", "icloud.com", "appleid.apple.com", "itunes.apple.com", "support.apple.com"],
+      "loginUrls": ["appleid.apple.com", "idmsa.apple.com"],
+      "priority": "critical"
+    },
+    {
+      "name": "Netflix",
+      "keywords": ["netflix"],
+      "legitimateDomains": ["netflix.com", "www.netflix.com"],
+      "loginUrls": ["netflix.com/login"],
+      "priority": "high"
+    },
+    {
+      "name": "Bank of America",
+      "keywords": ["bank of america", "bofa", "bankofamerica", "boa"],
+      "legitimateDomains": ["bankofamerica.com", "bofa.com", "mbna.com", "ml.com"],
+      "loginUrls": ["bankofamerica.com/login", "secure.bankofamerica.com"],
+      "priority": "critical"
+    },
+    {
+      "name": "Chase",
+      "keywords": ["chase", "jpmorgan"],
+      "legitimateDomains": ["chase.com", "jpmorganchase.com"],
+      "loginUrls": ["chase.com/web/auth", "secure.chase.com"],
+      "priority": "critical"
+    },
+    {
+      "name": "Wells Fargo",
+      "keywords": ["wells fargo", "wellsfargo"],
+      "legitimateDomains": ["wellsfargo.com"],
+      "loginUrls": ["connect.secure.wellsfargo.com"],
+      "priority": "critical"
+    },
+    {
+      "name": "Citibank",
+      "keywords": ["citi", "citibank", "citigroup"],
+      "legitimateDomains": ["citi.com", "citibank.com", "citigroup.com", "online.citi.com"],
+      "loginUrls": ["online.citi.com/US/login.do"],
+      "priority": "critical"
+    },
+    {
+      "name": "American Express",
+      "keywords": ["amex", "american express", "americanexpress"],
+      "legitimateDomains": ["americanexpress.com", "amex.com"],
+      "loginUrls": ["americanexpress.com/en-us/account/login"],
+      "priority": "critical"
+    },
+    {
+      "name": "eBay",
+      "keywords": ["ebay"],
+      "legitimateDomains": ["ebay.com", "ebay.co.*", "signin.ebay.com"],
+      "loginUrls": ["signin.ebay.com"],
+      "priority": "high"
+    },
+    {
+      "name": "Instagram",
+      "keywords": ["instagram", "insta"],
+      "legitimateDomains": ["instagram.com", "www.instagram.com"],
+      "loginUrls": ["instagram.com/accounts/login"],
+      "priority": "high"
+    },
+    {
+      "name": "Twitter",
+      "keywords": ["twitter", "tweet", "x.com"],
+      "legitimateDomains": ["twitter.com", "x.com", "t.co", "mobile.twitter.com"],
+      "loginUrls": ["twitter.com/login", "twitter.com/i/flow/login"],
+      "priority": "high"
+    },
+    {
+      "name": "Dropbox",
+      "keywords": ["dropbox"],
+      "legitimateDomains": ["dropbox.com", "www.dropbox.com"],
+      "loginUrls": ["dropbox.com/login"],
+      "priority": "medium"
+    },
+    {
+      "name": "Adobe",
+      "keywords": ["adobe", "acrobat", "photoshop", "creative cloud"],
+      "legitimateDomains": ["adobe.com", "creativecloud.adobe.com", "account.adobe.com"],
+      "loginUrls": ["account.adobe.com", "auth.services.adobe.com"],
+      "priority": "medium"
+    },
+    {
+      "name": "Spotify",
+      "keywords": ["spotify"],
+      "legitimateDomains": ["spotify.com", "open.spotify.com", "accounts.spotify.com"],
+      "loginUrls": ["accounts.spotify.com/login"],
+      "priority": "medium"
+    },
+    {
+      "name": "Uber",
+      "keywords": ["uber", "ubereats"],
+      "legitimateDomains": ["uber.com", "auth.uber.com"],
+      "loginUrls": ["auth.uber.com/login"],
+      "priority": "medium"
+    },
+    {
+      "name": "Airbnb",
+      "keywords": ["airbnb"],
+      "legitimateDomains": ["airbnb.com", "www.airbnb.com"],
+      "loginUrls": ["airbnb.com/login"],
+      "priority": "medium"
+    },
+    {
+      "name": "WhatsApp",
+      "keywords": ["whatsapp", "whats app"],
+      "legitimateDomains": ["whatsapp.com", "web.whatsapp.com", "www.whatsapp.com"],
+      "loginUrls": ["web.whatsapp.com"],
+      "priority": "high"
+    },
+    {
+      "name": "Telegram",
+      "keywords": ["telegram"],
+      "legitimateDomains": ["telegram.org", "web.telegram.org", "t.me"],
+      "loginUrls": ["web.telegram.org"],
+      "priority": "medium"
+    },
+    {
+      "name": "Discord",
+      "keywords": ["discord"],
+      "legitimateDomains": ["discord.com", "discordapp.com", "discord.gg"],
+      "loginUrls": ["discord.com/login"],
+      "priority": "medium"
+    },
+    {
+      "name": "Slack",
+      "keywords": ["slack"],
+      "legitimateDomains": ["slack.com", "*.slack.com"],
+      "loginUrls": ["slack.com/signin"],
+      "priority": "medium"
+    },
+    {
+      "name": "Zoom",
+      "keywords": ["zoom"],
+      "legitimateDomains": ["zoom.us", "zoom.com", "*.zoom.us"],
+      "loginUrls": ["zoom.us/signin"],
+      "priority": "medium"
+    },
+    {
+      "name": "Coinbase",
+      "keywords": ["coinbase"],
+      "legitimateDomains": ["coinbase.com", "pro.coinbase.com", "www.coinbase.com"],
+      "loginUrls": ["coinbase.com/signin", "login.coinbase.com"],
+      "priority": "critical"
+    },
+    {
+      "name": "Binance",
+      "keywords": ["binance"],
+      "legitimateDomains": ["binance.com", "binance.us", "www.binance.com"],
+      "loginUrls": ["accounts.binance.com/en/login"],
+      "priority": "critical"
+    },
+    {
+      "name": "Steam",
+      "keywords": ["steam", "valve"],
+      "legitimateDomains": ["steampowered.com", "store.steampowered.com", "steamcommunity.com"],
+      "loginUrls": ["store.steampowered.com/login", "steamcommunity.com/login"],
+      "priority": "high"
+    },
+    {
+      "name": "Epic Games",
+      "keywords": ["epic games", "epicgames", "fortnite", "unreal"],
+      "legitimateDomains": ["epicgames.com", "www.epicgames.com", "store.epicgames.com"],
+      "loginUrls": ["epicgames.com/id/login"],
+      "priority": "high"
+    },
+    {
+      "name": "Reddit",
+      "keywords": ["reddit"],
+      "legitimateDomains": ["reddit.com", "www.reddit.com", "old.reddit.com"],
+      "loginUrls": ["reddit.com/login"],
+      "priority": "medium"
+    },
+    {
+      "name": "GitHub",
+      "keywords": ["github"],
+      "legitimateDomains": ["github.com", "gist.github.com", "raw.githubusercontent.com"],
+      "loginUrls": ["github.com/login", "github.com/session"],
+      "priority": "high"
+    },
+    {
+      "name": "DHL",
+      "keywords": ["dhl"],
+      "legitimateDomains": ["dhl.com", "www.dhl.com", "mydhl.express.dhl"],
+      "loginUrls": ["mydhl.express.dhl"],
+      "priority": "high"
+    },
+    {
+      "name": "FedEx",
+      "keywords": ["fedex", "federal express"],
+      "legitimateDomains": ["fedex.com", "www.fedex.com"],
+      "loginUrls": ["fedex.com/secure-login"],
+      "priority": "high"
+    },
+    {
+      "name": "UPS",
+      "keywords": ["ups", "united parcel"],
+      "legitimateDomains": ["ups.com", "www.ups.com"],
+      "loginUrls": ["ups.com/lasso/login"],
+      "priority": "high"
+    },
+    {
+      "name": "USPS",
+      "keywords": ["usps", "postal service"],
+      "legitimateDomains": ["usps.com", "www.usps.com", "reg.usps.com"],
+      "loginUrls": ["reg.usps.com/entreg/LoginAction"],
+      "priority": "high"
+    },
+    {
+      "name": "IRS",
+      "keywords": ["irs", "internal revenue"],
+      "legitimateDomains": ["irs.gov", "www.irs.gov"],
+      "loginUrls": ["sa.www4.irs.gov"],
+      "priority": "critical"
+    },
+    {
+      "name": "Social Security",
+      "keywords": ["social security", "ssa"],
+      "legitimateDomains": ["ssa.gov", "www.ssa.gov", "secure.ssa.gov"],
+      "loginUrls": ["secure.ssa.gov/RIL/SiView.action"],
+      "priority": "critical"
+    },
+    {
+      "name": "Venmo",
+      "keywords": ["venmo"],
+      "legitimateDomains": ["venmo.com", "www.venmo.com"],
+      "loginUrls": ["account.venmo.com/login"],
+      "priority": "high"
+    },
+    {
+      "name": "Cash App",
+      "keywords": ["cash app", "cashapp", "square cash"],
+      "legitimateDomains": ["cash.app", "www.cash.app", "square.com"],
+      "loginUrls": ["cash.app/login"],
+      "priority": "high"
+    },
+    {
+      "name": "Zelle",
+      "keywords": ["zelle"],
+      "legitimateDomains": ["zellepay.com", "www.zellepay.com"],
+      "loginUrls": ["zellepay.com"],
+      "priority": "high"
+    },
+    {
+      "name": "Capital One",
+      "keywords": ["capital one", "capitalone"],
+      "legitimateDomains": ["capitalone.com", "www.capitalone.com", "verified.capitalone.com"],
+      "loginUrls": ["verified.capitalone.com/auth/signin"],
+      "priority": "critical"
+    },
+    {
+      "name": "Discover",
+      "keywords": ["discover"],
+      "legitimateDomains": ["discover.com", "www.discover.com", "card.discover.com"],
+      "loginUrls": ["card.discover.com/cardmembersvcs/loginlogout/app/login"],
+      "priority": "critical"
+    },
+    {
+      "name": "TD Bank",
+      "keywords": ["td bank", "tdbank"],
+      "legitimateDomains": ["td.com", "tdbank.com", "www.td.com", "www.tdbank.com", "onlinebanking.tdbank.com"],
+      "loginUrls": ["onlinebanking.tdbank.com"],
+      "priority": "critical"
+    },
+    {
+      "name": "HSBC",
+      "keywords": ["hsbc"],
+      "legitimateDomains": ["hsbc.com", "www.hsbc.com", "www.us.hsbc.com"],
+      "loginUrls": ["www.us.hsbc.com/online-banking"],
+      "priority": "critical"
+    },
+    {
+      "name": "Barclays",
+      "keywords": ["barclays"],
+      "legitimateDomains": ["barclays.com", "barclays.co.uk", "www.barclays.co.uk"],
+      "loginUrls": ["bank.barclays.co.uk/olb/authlogin/loginAppContainer.do"],
+      "priority": "critical"
+    }
+  ]
+}

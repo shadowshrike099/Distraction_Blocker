@@ -23,6 +23,7 @@
             <button class="tab-btn" data-tab="emergency">Security</button>
             <button class="tab-btn" data-tab="logs">Audit Logs</button>
             <button class="tab-btn" data-tab="risk">Risk Score</button>
+            <button class="tab-btn" data-tab="security-center">Security Center</button>
         </nav>
 
         <main>
@@ -166,6 +167,192 @@
                     <button id="refresh-risk" class="btn secondary">Analyze Now</button>
                 </div>
             </section>
+
+            <!-- Security Center Tab -->
+            <section id="security-center-tab" class="tab-content">
+                <h2>Security Center</h2>
+
+                <!-- Security Stats Overview -->
+                <div class="security-stats-grid">
+                    <div class="security-stat-card">
+                        <div class="stat-icon threats">🛡️</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="threats-blocked-count">0</span>
+                            <span class="stat-label">Threats Blocked</span>
+                        </div>
+                    </div>
+                    <div class="security-stat-card">
+                        <div class="stat-icon urls">🔗</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="urls-analyzed-count">0</span>
+                            <span class="stat-label">URLs Analyzed</span>
+                        </div>
+                    </div>
+                    <div class="security-stat-card">
+                        <div class="stat-icon phishing">🎣</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="phishing-blocked-count">0</span>
+                            <span class="stat-label">Phishing Blocked</span>
+                        </div>
+                    </div>
+                    <div class="security-stat-card">
+                        <div class="stat-icon trackers">👁️</div>
+                        <div class="stat-info">
+                            <span class="stat-value" id="trackers-blocked-count">0</span>
+                            <span class="stat-label">Trackers Blocked</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature Toggles -->
+                <div class="card" style="margin-top: 24px;">
+                    <h3>Security Features</h3>
+                    <div class="feature-toggles">
+                        <label class="toggle-label feature-toggle-item">
+                            <input type="checkbox" id="toggle-url-analysis" class="toggle" checked>
+                            <span class="toggle-slider"></span>
+                            <div class="feature-info">
+                                <span class="feature-name">URL Analysis</span>
+                                <span class="feature-desc">Detect malicious URLs, typosquatting, and homograph attacks</span>
+                            </div>
+                        </label>
+                        <label class="toggle-label feature-toggle-item">
+                            <input type="checkbox" id="toggle-phishing-detection" class="toggle" checked>
+                            <span class="toggle-slider"></span>
+                            <div class="feature-info">
+                                <span class="feature-name">Phishing Detection</span>
+                                <span class="feature-desc">Analyze pages for phishing indicators and fake login forms</span>
+                            </div>
+                        </label>
+                        <label class="toggle-label feature-toggle-item">
+                            <input type="checkbox" id="toggle-content-filtering" class="toggle" checked>
+                            <span class="toggle-slider"></span>
+                            <div class="feature-info">
+                                <span class="feature-name">Content Filtering</span>
+                                <span class="feature-desc">Block adult, gambling, and other unwanted content</span>
+                            </div>
+                        </label>
+                        <label class="toggle-label feature-toggle-item">
+                            <input type="checkbox" id="toggle-privacy-protection" class="toggle" checked>
+                            <span class="toggle-slider"></span>
+                            <div class="feature-info">
+                                <span class="feature-name">Privacy Protection</span>
+                                <span class="feature-desc">Block trackers and clean tracking parameters from URLs</span>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Content Filter Categories -->
+                <div class="card" style="margin-top: 24px;">
+                    <h3>Content Filter Categories</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+                        Enable filtering for specific content categories
+                    </p>
+                    <div class="category-toggles">
+                        <label class="toggle-label category-toggle-item">
+                            <input type="checkbox" id="filter-adult" class="toggle" checked>
+                            <span class="toggle-slider"></span>
+                            <span>Adult Content</span>
+                        </label>
+                        <label class="toggle-label category-toggle-item">
+                            <input type="checkbox" id="filter-gambling" class="toggle">
+                            <span class="toggle-slider"></span>
+                            <span>Gambling</span>
+                        </label>
+                        <label class="toggle-label category-toggle-item">
+                            <input type="checkbox" id="filter-violence" class="toggle">
+                            <span class="toggle-slider"></span>
+                            <span>Violence/Gore</span>
+                        </label>
+                        <label class="toggle-label category-toggle-item">
+                            <input type="checkbox" id="filter-drugs" class="toggle">
+                            <span class="toggle-slider"></span>
+                            <span>Drugs</span>
+                        </label>
+                        <label class="toggle-label category-toggle-item">
+                            <input type="checkbox" id="filter-piracy" class="toggle">
+                            <span class="toggle-slider"></span>
+                            <span>Piracy</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Privacy Settings -->
+                <div class="card" style="margin-top: 24px;">
+                    <h3>Privacy Settings</h3>
+                    <div class="privacy-options">
+                        <label class="toggle-label">
+                            <input type="checkbox" id="clean-urls" class="toggle" checked>
+                            <span class="toggle-slider"></span>
+                            <span>Clean tracking parameters from URLs</span>
+                        </label>
+                        <div class="tracker-categories" style="margin-top: 16px;">
+                            <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 12px;">Block tracker types:</p>
+                            <div class="tracker-toggles">
+                                <label class="toggle-label tracker-toggle-item">
+                                    <input type="checkbox" id="block-analytics" class="toggle" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span>Analytics</span>
+                                </label>
+                                <label class="toggle-label tracker-toggle-item">
+                                    <input type="checkbox" id="block-advertising" class="toggle" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span>Advertising</span>
+                                </label>
+                                <label class="toggle-label tracker-toggle-item">
+                                    <input type="checkbox" id="block-social" class="toggle">
+                                    <span class="toggle-slider"></span>
+                                    <span>Social</span>
+                                </label>
+                                <label class="toggle-label tracker-toggle-item">
+                                    <input type="checkbox" id="block-fingerprinting" class="toggle" checked>
+                                    <span class="toggle-slider"></span>
+                                    <span>Fingerprinting</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Whitelist Management -->
+                <div class="card" style="margin-top: 24px;">
+                    <h3>Trusted Sites (Whitelist)</h3>
+                    <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 16px;">
+                        Sites added here will bypass security checks
+                    </p>
+                    <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                        <input type="text" id="whitelist-input" placeholder="Enter domain (e.g., example.com)" style="flex: 1;">
+                        <button id="add-whitelist" class="btn primary" style="height: fit-content; padding: 12px 20px;">Add</button>
+                    </div>
+                    <ul id="whitelist-container" class="list">
+                        <!-- Populated by JS -->
+                    </ul>
+                </div>
+
+                <!-- Alert History -->
+                <div class="card" style="margin-top: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="margin: 0; border: none; padding: 0;">Security Alert History</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <button id="refresh-alerts" class="btn secondary small">Refresh</button>
+                            <button id="clear-alerts" class="btn secondary small">Clear All</button>
+                        </div>
+                    </div>
+                    <div id="alerts-container" class="alerts-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="card" style="margin-top: 24px;">
+                    <h3>Export Security Data</h3>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button id="export-security-json" class="btn secondary">Export All Data (JSON)</button>
+                        <button id="export-alerts-csv" class="btn secondary">Export Alerts (CSV)</button>
+                    </div>
+                </div>
+            </section>
         </main>
 
         <footer>
@@ -175,6 +362,7 @@
     </div>
     <script src="../config.js"></script>
     <script src="options.js"></script>
+    <script src="securityCenter.js"></script>
 </body>
 
 </html>

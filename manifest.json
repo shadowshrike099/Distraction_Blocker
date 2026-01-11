@@ -8,7 +8,10 @@
     "alarms",
     "activeTab",
     "scripting",
-    "declarativeNetRequest"
+    "declarativeNetRequest",
+    "webNavigation",
+    "notifications",
+    "tabs"
   ],
   "host_permissions": [
     "*://*/*"
@@ -53,8 +56,22 @@
         "content/guardian.js"
       ],
       "run_at": "document_start"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content/securityScanner.js"],
+      "css": ["content/threatOverlay.css"],
+      "run_at": "document_idle",
+      "all_frames": false
     }
   ],
+  "web_accessible_resources": [{
+    "resources": [
+      "content/threatOverlay.css",
+      "data/*.json"
+    ],
+    "matches": ["<all_urls>"]
+  }],
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",

@@ -1,0 +1,52 @@
+{
+  "description": "Known malicious domains - sample set (should be updated regularly)",
+  "lastUpdated": "2025-01-01",
+  "sources": ["URLhaus", "PhishTank", "OpenPhish"],
+  "phishing": [
+    "secure-paypal-login.com",
+    "paypa1-security.com",
+    "facebook-login-secure.com",
+    "amazon-security-alert.com",
+    "google-account-verify.com",
+    "apple-id-locked.com",
+    "netflix-payment-update.com",
+    "bank0famerica-secure.com"
+  ],
+  "malware": [
+    "free-software-downloads.xyz",
+    "crack-serial-keygen.top",
+    "download-free-movies.tk"
+  ],
+  "scam": [
+    "lottery-winner-claim.com",
+    "free-iphone-giveaway.com",
+    "earn-money-fast.xyz"
+  ],
+  "patterns": [
+    {
+      "pattern": "secure.*login.*\\.(tk|ml|ga|cf|gq)$",
+      "type": "phishing",
+      "score": 40
+    },
+    {
+      "pattern": "(paypal|amazon|google|facebook|apple|microsoft).*\\.(xyz|top|click|link)$",
+      "type": "phishing",
+      "score": 45
+    },
+    {
+      "pattern": ".*-verify(-|\\.).*",
+      "type": "phishing",
+      "score": 20
+    },
+    {
+      "pattern": ".*-secure(-|\\.).*",
+      "type": "phishing",
+      "score": 15
+    },
+    {
+      "pattern": "(free|crack|keygen|serial|warez).*\\.(xyz|top|tk|ml)$",
+      "type": "malware",
+      "score": 35
+    }
+  ]
+}

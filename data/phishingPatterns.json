@@ -1,0 +1,136 @@
+{
+  "description": "Regex patterns for detecting phishing content",
+  "urgencyPatterns": [
+    {
+      "pattern": "your account (will be|has been|is being) (suspended|locked|closed|terminated|disabled)",
+      "score": 25,
+      "category": "account_threat"
+    },
+    {
+      "pattern": "(verify|confirm|validate) (your )?(account|identity|information|email|details) (immediately|now|within|urgently)",
+      "score": 20,
+      "category": "verification_request"
+    },
+    {
+      "pattern": "unusual (activity|sign[- ]?in|login|transaction|access) (detected|found|noticed)",
+      "score": 25,
+      "category": "suspicious_activity"
+    },
+    {
+      "pattern": "unauthorized (access|transaction|login|activity|use)",
+      "score": 25,
+      "category": "unauthorized"
+    },
+    {
+      "pattern": "(security|important|urgent|critical) (alert|notice|warning|notification|update)",
+      "score": 15,
+      "category": "security_alert"
+    },
+    {
+      "pattern": "(click|act|respond|reply) (here )?(immediately|now|urgently|within \\d+ (hours?|days?|minutes?))",
+      "score": 20,
+      "category": "urgent_action"
+    },
+    {
+      "pattern": "failure to (verify|confirm|respond|act|update) (will|may) result in",
+      "score": 25,
+      "category": "consequence_threat"
+    },
+    {
+      "pattern": "(limited time|act fast|don't wait|hurry|expires? (soon|in|within))",
+      "score": 15,
+      "category": "time_pressure"
+    },
+    {
+      "pattern": "\\d+ (hours?|days?|minutes?) (left|remaining|to act|to respond|until|before)",
+      "score": 20,
+      "category": "countdown"
+    },
+    {
+      "pattern": "(permanently|immediately) (delete|remove|lose|suspend|terminate|close)",
+      "score": 25,
+      "category": "permanent_action"
+    },
+    {
+      "pattern": "we (detected|noticed|found|identified) (a |an )?(problem|issue|suspicious|unauthorized)",
+      "score": 15,
+      "category": "problem_detected"
+    },
+    {
+      "pattern": "update (your )?(payment|billing|credit card|bank|financial) (info|information|details|method)",
+      "score": 20,
+      "category": "payment_update"
+    }
+  ],
+  "credentialPatterns": [
+    {
+      "pattern": "(enter|provide|confirm|verify|update) (your )?(password|credentials|login|username|pin)",
+      "score": 20,
+      "category": "credential_request"
+    },
+    {
+      "pattern": "(enter|provide|confirm|verify) (your )?(ssn|social security|tax id|national id)",
+      "score": 35,
+      "category": "ssn_request"
+    },
+    {
+      "pattern": "(enter|provide|confirm|verify) (your )?(credit card|debit card|card number|cvv|expir)",
+      "score": 35,
+      "category": "card_request"
+    },
+    {
+      "pattern": "(enter|provide|confirm|verify) (your )?(bank account|routing number|account number)",
+      "score": 35,
+      "category": "bank_request"
+    },
+    {
+      "pattern": "(reset|recover|restore) (your )?(password|access|account)",
+      "score": 10,
+      "category": "password_reset"
+    }
+  ],
+  "rewardPatterns": [
+    {
+      "pattern": "(you('ve| have)?|congratulations!?) (won|been selected|been chosen|are a winner)",
+      "score": 30,
+      "category": "prize_claim"
+    },
+    {
+      "pattern": "claim (your )?(prize|reward|gift|bonus|winnings)",
+      "score": 30,
+      "category": "claim_reward"
+    },
+    {
+      "pattern": "(free|complimentary) (gift|prize|reward|offer|trial)",
+      "score": 15,
+      "category": "free_offer"
+    },
+    {
+      "pattern": "(lottery|sweepstakes|raffle|drawing) (winner|winning|won)",
+      "score": 35,
+      "category": "lottery_scam"
+    },
+    {
+      "pattern": "(inheritance|million|billion|\\$[0-9,]+) (dollars?|usd|funds?|transfer)",
+      "score": 35,
+      "category": "money_scam"
+    }
+  ],
+  "impersonationPatterns": [
+    {
+      "pattern": "(dear|hello) (valued |loyal )?(customer|member|user|client|account holder)",
+      "score": 10,
+      "category": "generic_greeting"
+    },
+    {
+      "pattern": "(official|automated|system) (notification|message|email|alert)",
+      "score": 10,
+      "category": "official_claim"
+    },
+    {
+      "pattern": "(security|support|customer service|helpdesk|admin) team",
+      "score": 5,
+      "category": "team_impersonation"
+    }
+  ]
+}
