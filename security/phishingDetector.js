@@ -186,8 +186,44 @@ function detectBrandImpersonation(pageData, currentDomain) {
     return result;
   }
 
-  const pageText = (pageData.title + ' ' + pageData.textContent).toLowerCase();
+  // Whitelist of trusted domains that should never be flagged for brand impersonation
+  // These are legitimate sites that may display content about other brands
+  const trustedDomains = [
+    'google.com', 'google.co', 'www.google.',
+    'bing.com', 'www.bing.com',
+    'yahoo.com', 'search.yahoo.com',
+    'duckduckgo.com', 'www.duckduckgo.com',
+    'yandex.com', 'yandex.ru',
+    'baidu.com', 'www.baidu.com',
+    'youtube.com', 'www.youtube.com',
+    'wikipedia.org', 'en.wikipedia.org',
+    'reddit.com', 'www.reddit.com',
+    'twitter.com', 'x.com',
+    'facebook.com', 'www.facebook.com',
+    'instagram.com', 'www.instagram.com',
+    'linkedin.com', 'www.linkedin.com',
+    'github.com', 'www.github.com',
+    'stackoverflow.com', 'www.stackoverflow.com',
+    'amazon.com', 'www.amazon.',
+    'ebay.com', 'www.ebay.com',
+    'cnn.com', 'bbc.com', 'nytimes.com',
+    'medium.com', 'quora.com'
+  ];
+
   const domainLower = currentDomain.toLowerCase();
+
+  // Check if current domain is trusted - skip brand impersonation check
+  const isTrustedDomain = trustedDomains.some(trusted =>
+    domainLower === trusted ||
+    domainLower.endsWith('.' + trusted) ||
+    domainLower.includes(trusted)
+  );
+
+  if (isTrustedDomain) {
+    return result; // Don't flag trusted domains
+  }
+
+  const pageText = (pageData.title + ' ' + pageData.textContent).toLowerCase();
 
   for (const brand of brandDatabasePhishing.brands) {
     // Check if page contains brand keywords
