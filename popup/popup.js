@@ -60,6 +60,7 @@ function init() {
     loadStateFromStorage();
     checkIncognitoAccess();
     setupEventListeners();
+    updateSecurityStatus();
 }
 
 function setupRing() {
@@ -453,6 +454,41 @@ function setupEventListeners() {
         guardianUnlockModal.classList.add('hidden');
     });
 
+}
+
+// Security Status Update
+async function updateSecurityStatus() {
+    const securityStatusBar = document.getElementById('security-status');
+    const securityStatusText = document.getElementById('security-status-text');
+    const threatsBadge = document.getElementById('threats-badge');
+
+    try {
+        const response = await new Promise((resolve) => {
+            chrome.runtime.sendMessage({ type: 'SECURITY_GET_STATS' }, resolve);
+        });
+
+        if (response && response.core) {
+            const threatsBlocked = response.core.threatsBlocked || 0;
+            const alertsLast24h = response.alerts?.last24Hours || 0;
+
+            if (alertsLast24h > 0) {
+                securityStatusBar.className = 'security-status-bar warning';
+                securityStatusText.textContent = `${alertsLast24h} alert(s) today`;
+                threatsBadge.textContent = alertsLast24h;
+                threatsBadge.classList.remove('hidden');
+            } else if (threatsBlocked > 0) {
+                securityStatusBar.className = 'security-status-bar';
+                securityStatusText.textContent = `${threatsBlocked} threats blocked`;
+                threatsBadge.classList.add('hidden');
+            } else {
+                securityStatusBar.className = 'security-status-bar';
+                securityStatusText.textContent = 'Protected';
+                threatsBadge.classList.add('hidden');
+            }
+        }
+    } catch (error) {
+        console.warn('[Popup] Failed to get security stats:', error);
+    }
 }
 
 // Init

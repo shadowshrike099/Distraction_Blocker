@@ -1,0 +1,79 @@
+{
+  "description": "Keywords for content category filtering",
+  "categories": {
+    "adult": {
+      "explicit": [
+        "porn", "porno", "pornography", "xxx", "xxxx", "nsfw",
+        "sex", "sexy", "sexual", "nude", "nudes", "naked",
+        "adult", "adults only", "18+", "21+",
+        "erotic", "erotica", "fetish", "bdsm", "bondage",
+        "hentai", "yaoi", "yuri", "ecchi", "doujin",
+        "escort", "escorts", "hooker", "prostitute",
+        "stripper", "strippers", "striptease",
+        "cam girl", "camgirl", "webcam", "livecam",
+        "onlyfans", "fansly", "manyvids",
+        "playboy", "penthouse", "hustler",
+        "xvideos", "xnxx", "pornhub", "xhamster", "redtube", "youporn"
+      ],
+      "moderate": [
+        "dating", "hookup", "hook up", "one night", "casual encounter",
+        "milf", "dilf", "gilf", "cougar", "sugar daddy", "sugar mommy",
+        "lingerie", "underwear", "bikini", "swimsuit"
+      ],
+      "blockTlds": [".xxx", ".adult", ".porn", ".sex", ".sexy"]
+    },
+    "gambling": {
+      "keywords": [
+        "casino", "casinos", "gambling", "gamble",
+        "poker", "blackjack", "roulette", "slots", "slot machine",
+        "betting", "bet", "bets", "wager", "wagering",
+        "sportsbook", "sportsbetting", "sports betting",
+        "jackpot", "lottery", "lotto", "powerball", "mega millions",
+        "baccarat", "craps", "keno", "bingo",
+        "bet365", "draftkings", "fanduel", "bovada", "betway",
+        "pokerstars", "888poker", "partypoker", "wsop",
+        "online casino", "live casino", "mobile casino"
+      ],
+      "blockTlds": [".bet", ".casino", ".poker", ".games"]
+    },
+    "violence": {
+      "keywords": [
+        "gore", "gory", "graphic violence", "extreme violence",
+        "death", "dead body", "corpse", "murder", "murders", "murdered",
+        "killing", "kill", "killed", "torture", "tortured",
+        "brutal", "brutality", "execution", "executed",
+        "beheading", "beheaded", "dismember", "dismembered",
+        "massacre", "slaughter", "carnage",
+        "snuff", "shock site", "shock video"
+      ]
+    },
+    "drugs": {
+      "keywords": [
+        "drugs", "drug dealer", "drug dealing",
+        "cocaine", "crack", "heroin", "meth", "methamphetamine",
+        "marijuana", "cannabis", "weed", "pot", "ganja", "420",
+        "lsd", "acid", "mushrooms", "shrooms", "psilocybin",
+        "ecstasy", "mdma", "molly", "ketamine",
+        "opioid", "opioids", "fentanyl", "oxy", "oxycontin",
+        "darknet market", "dark web market", "silk road"
+      ]
+    },
+    "piracy": {
+      "keywords": [
+        "torrent", "torrents", "bittorrent", "magnet link",
+        "pirate", "piracy", "pirated", "warez",
+        "crack", "cracked", "keygen", "serial key",
+        "free download", "full version free", "no registration",
+        "watch free", "stream free", "download free movies",
+        "123movies", "fmovies", "putlocker", "solarmovie"
+      ]
+    }
+  },
+  "safeModeParams": {
+    "google": { "param": "safe", "value": "active" },
+    "bing": { "param": "adlt", "value": "strict" },
+    "duckduckgo": { "param": "kp", "value": "1" },
+    "yahoo": { "param": "vm", "value": "r" },
+    "yandex": { "param": "fyandex", "value": "1" }
+  }
+}

@@ -402,3 +402,59 @@ input:checked+.slider:before {
 .instruction-steps strong {
     color: var(--text-primary);
 }
+
+/* Security Status Bar */
+.security-status-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+    border-radius: 8px;
+    margin-bottom: 16px;
+    font-size: 12px;
+}
+
+.security-status-bar.warning {
+    background: rgba(202, 138, 4, 0.1);
+    border-color: rgba(202, 138, 4, 0.2);
+}
+
+.security-status-bar.danger {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.security-icon {
+    font-size: 14px;
+}
+
+#security-status-text {
+    flex: 1;
+    color: #34d399;
+    font-weight: 500;
+}
+
+.security-status-bar.warning #security-status-text {
+    color: #fbbf24;
+}
+
+.security-status-bar.danger #security-status-text {
+    color: #f87171;
+}
+
+.threat-badge {
+    background: #ef4444;
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 18px;
+    text-align: center;
+}
+
+.threat-badge.hidden {
+    display: none;
+}

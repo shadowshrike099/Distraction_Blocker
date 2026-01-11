@@ -184,6 +184,66 @@ function getCurrentScheduleMultiplier(schedules = null) {
     return 1.0; // No matching schedule, use default
 }
 
+// ==========================================
+// Security Configuration
+// ==========================================
+
+/**
+ * Security feature configuration
+ */
+const SECURITY_CONFIG = {
+    features: {
+        urlAnalysis: true,
+        phishingDetection: true,
+        contentFiltering: true,
+        privacyProtection: true,
+        safeSearchEnforcement: true
+    },
+    thresholds: {
+        critical: 90,
+        high: 70,
+        medium: 40,
+        low: 1
+    },
+    contentCategories: {
+        adult: { enabled: true, strictness: 'high' },
+        gambling: { enabled: false, strictness: 'medium' },
+        violence: { enabled: false, strictness: 'medium' },
+        drugs: { enabled: false, strictness: 'low' },
+        piracy: { enabled: false, strictness: 'low' }
+    },
+    privacy: {
+        blockTrackers: true,
+        cleanUrls: true,
+        trackerCategories: {
+            analytics: true,
+            advertising: true,
+            social: false,
+            fingerprinting: true
+        }
+    },
+    alerts: {
+        showNotifications: true,
+        showOverlays: true,
+        logAlerts: true
+    }
+};
+
+/**
+ * Security storage keys
+ */
+const SECURITY_STORAGE_KEYS = {
+    SETTINGS: 'securitySettings',
+    STATS: 'securityStats',
+    ALERTS: 'securityAlerts',
+    WHITELIST: 'securityWhitelist',
+    TRACKER_STATS: 'trackerStats',
+    THREATS_BLOCKED: 'threatsBlocked',
+    URLS_CLEANED: 'urlsCleaned',
+    PHISHING_BLOCKED: 'phishingBlocked',
+    CONTENT_BLOCKED: 'contentBlocked'
+};
+
 // Export for use in different contexts
 if (typeof module !== 'undefined' && module.exports) {
     // Node.js/CommonJS
@@ -194,6 +254,8 @@ if (typeof module !== 'undefined' && module.exports) {
         DEFAULT_GLOBAL_LIMIT,
         DEFAULT_TIME_SCHEDULES,
         STORAGE_KEYS,
+        SECURITY_CONFIG,
+        SECURITY_STORAGE_KEYS,
         findMatchingDomain,
         isDistractingSite,
         getCurrentScheduleMultiplier

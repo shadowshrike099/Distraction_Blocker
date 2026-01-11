@@ -3,6 +3,18 @@
 // Import centralized configuration
 importScripts('config.js');
 
+// Security module imports
+importScripts(
+  'security/securityConfig.js',
+  'security/bloomFilter.js',
+  'security/urlAnalyzer.js',
+  'security/phishingDetector.js',
+  'security/contentFilter.js',
+  'security/privacyShield.js',
+  'security/alertManager.js',
+  'security/securityCore.js'
+);
+
 // Constants
 const ALARM_NAME = 'focus-session-end';
 
@@ -124,6 +136,8 @@ chrome.runtime.onInstalled.addListener(() => {
     setupMidnightAlarm();
     initTimeGuardian();
     setupMidnightAlarm();
+    // Initialize security modules
+    initializeSecurity();
 });
 
 // On startup
@@ -131,6 +145,8 @@ chrome.runtime.onStartup.addListener(() => {
     enforceActiveSession();
     addSecurityLog('extension_startup', {});
     initTimeGuardian();
+    // Initialize security modules
+    initializeSecurity();
 });
 
 
@@ -172,6 +188,43 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             return true;
         case 'VERIFY_GUARDIAN_PASSWORD':
             handleVerifyGuardianPassword(message.payload).then(sendResponse);
+            return true;
+        // Security module message handlers
+        case 'SECURITY_ANALYZE_URL':
+            handleSecurityAnalyzeUrl(message.payload).then(sendResponse);
+            return true;
+        case 'SECURITY_ANALYZE_PAGE':
+            handleSecurityAnalyzePage(message.payload).then(sendResponse);
+            return true;
+        case 'SECURITY_GET_STATS':
+            handleGetSecurityStats().then(sendResponse);
+            return true;
+        case 'SECURITY_UPDATE_SETTINGS':
+            handleUpdateSecuritySettings(message.payload).then(sendResponse);
+            return true;
+        case 'SECURITY_GET_SETTINGS':
+            handleGetSecuritySettings().then(sendResponse);
+            return true;
+        case 'SECURITY_WHITELIST_ADD':
+            handleWhitelistAdd(message.payload).then(sendResponse);
+            return true;
+        case 'SECURITY_WHITELIST_REMOVE':
+            handleWhitelistRemove(message.payload).then(sendResponse);
+            return true;
+        case 'SECURITY_GET_ALERTS':
+            handleGetSecurityAlerts().then(sendResponse);
+            return true;
+        case 'SECURITY_CLEAR_ALERTS':
+            handleClearSecurityAlerts().then(sendResponse);
+            return true;
+        case 'SECURITY_SHOW_WARNING_REQUEST':
+            handleSecurityShowWarningRequest(message.payload, sender).then(sendResponse);
+            return true;
+        case 'SECURITY_EXPORT_DATA':
+            handleSecurityExportData().then(sendResponse);
+            return true;
+        case 'SECURITY_GET_WHITELIST':
+            handleGetWhitelist().then(sendResponse);
             return true;
         default:
             sendResponse({ success: false, error: 'Unknown message type' });
@@ -871,3 +924,176 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
         }
     }
 });
+
+
+// ==========================================
+// Security Module Integration
+// ==========================================
+
+// Security: URL interception via webNavigation
+chrome.webNavigation.onBeforeNavigate.addListener(async (details) => {
+    // Only process main frame
+    if (details.frameId !== 0) return;
+
+    // Skip extension pages and chrome:// URLs
+    if (details.url.startsWith('chrome') || details.url.startsWith('moz-extension')) return;
+
+    try {
+        // Check if security is initialized
+        if (typeof analyzeUrlSecurity !== 'function') return;
+
+        const result = await analyzeUrlSecurity(details.url);
+
+        if (result.recommendation === 'BLOCK' || result.recommendation === 'WARN') {
+            // Show warning overlay
+            if (typeof showThreatWarning === 'function') {
+                showThreatWarning(details.tabId, result);
+            }
+        }
+
+        // Clean tracking parameters
+        if (typeof cleanTrackingParams === 'function') {
+            const cleanResult = cleanTrackingParams(details.url);
+            if (cleanResult.modified && cleanResult.cleanedUrl !== details.url) {
+                chrome.tabs.update(details.tabId, { url: cleanResult.cleanedUrl });
+            }
+        }
+    } catch (e) {
+        console.warn('Security analysis error:', e);
+    }
+});
+
+// Security handler functions
+async function handleSecurityAnalyzeUrl(payload) {
+    try {
+        if (typeof analyzeUrlSecurity === 'function') {
+            return await analyzeUrlSecurity(payload.url);
+        }
+        return { error: 'Security module not initialized' };
+    } catch (error) {
+        return { error: error.message };
+    }
+}
+
+async function handleSecurityAnalyzePage(pageData) {
+    try {
+        if (typeof analyzePageSecurity === 'function') {
+            return await analyzePageSecurity(pageData);
+        }
+        return { error: 'Security module not initialized' };
+    } catch (error) {
+        return { error: error.message };
+    }
+}
+
+async function handleGetSecurityStats() {
+    try {
+        if (typeof getSecurityStats === 'function') {
+            return await getSecurityStats();
+        }
+        return { error: 'Security module not initialized' };
+    } catch (error) {
+        return { error: error.message };
+    }
+}
+
+async function handleUpdateSecuritySettings(settings) {
+    try {
+        if (typeof updateSecuritySettings === 'function') {
+            return await updateSecuritySettings(settings);
+        }
+        return { success: false, error: 'Security module not initialized' };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function handleGetSecuritySettings() {
+    try {
+        if (typeof getSecuritySettings === 'function') {
+            return await getSecuritySettings();
+        }
+        return { error: 'Security module not initialized' };
+    } catch (error) {
+        return { error: error.message };
+    }
+}
+
+async function handleWhitelistAdd(payload) {
+    try {
+        if (typeof addToWhitelist === 'function') {
+            return { success: await addToWhitelist(payload.domain) };
+        }
+        return { success: false, error: 'Security module not initialized' };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function handleWhitelistRemove(payload) {
+    try {
+        if (typeof removeFromWhitelist === 'function') {
+            return { success: await removeFromWhitelist(payload.domain) };
+        }
+        return { success: false, error: 'Security module not initialized' };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function handleGetSecurityAlerts() {
+    try {
+        if (typeof getAlertHistory === 'function') {
+            return { success: true, alerts: getAlertHistory(50) };
+        }
+        return { success: false, error: 'Security module not initialized' };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function handleClearSecurityAlerts() {
+    try {
+        if (typeof clearAlertHistory === 'function') {
+            await clearAlertHistory();
+            return { success: true };
+        }
+        return { success: false, error: 'Security module not initialized' };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function handleSecurityShowWarningRequest(payload, sender) {
+    try {
+        if (typeof showThreatWarning === 'function' && sender.tab) {
+            await showThreatWarning(sender.tab.id, payload.threatData);
+            return { success: true };
+        }
+        return { success: false, error: 'Cannot show warning' };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
+
+async function handleSecurityExportData() {
+    try {
+        if (typeof exportSecurityData === 'function') {
+            return await exportSecurityData();
+        }
+        return { error: 'Security module not initialized' };
+    } catch (error) {
+        return { error: error.message };
+    }
+}
+
+async function handleGetWhitelist() {
+    try {
+        if (typeof getWhitelist === 'function') {
+            return { success: true, whitelist: getWhitelist() };
+        }
+        return { success: false, error: 'Security module not initialized' };
+    } catch (error) {
+        return { success: false, error: error.message };
+    }
+}
