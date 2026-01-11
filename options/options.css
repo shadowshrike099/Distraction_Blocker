@@ -588,3 +588,115 @@ footer {
 #whitelist-container::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.3);
 }
+
+/* ==========================================
+   Risk Score Enhanced Styles
+   ========================================== */
+
+/* Risk Factor Items */
+.risk-factor-item {
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.risk-factor-item:last-child {
+    margin-bottom: 0;
+}
+
+.risk-factor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.risk-factor-name {
+    font-weight: 500;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.risk-factor-score {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--danger-color);
+}
+
+.risk-factor-score.bonus {
+    color: var(--success-color);
+}
+
+.risk-factor-bar {
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.risk-factor-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #fbbf24, #ef4444);
+    border-radius: 3px;
+    transition: width 0.5s ease;
+}
+
+.risk-factor-bar.bonus .risk-factor-fill.bonus {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.risk-factor-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+/* Statistics Boxes */
+.stat-box {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+}
+
+.stat-box-value {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 4px;
+}
+
+.stat-box-label {
+    display: block;
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.3;
+}
+
+/* Emergency Unlock Styles */
+#session-indicator.active {
+    background: var(--success-color);
+    animation: pulse 2s infinite;
+}
+
+#session-indicator.locked {
+    background: var(--danger-color);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Code Match Status */
+#code-match-status.match {
+    color: var(--success-color);
+}
+
+#code-match-status.no-match {
+    color: var(--danger-color);
+}
