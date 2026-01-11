@@ -84,6 +84,20 @@ async function initializeSecurity() {
 }
 
 /**
+ * Ensure security is initialized before operations
+ * This is needed because MV3 service workers can sleep and lose state
+ * @async
+ * @returns {Promise<boolean>} Whether security is ready
+ */
+async function ensureSecurityInitialized() {
+  if (!securityInitialized) {
+    console.log('[Security] Service worker woke up - reinitializing...');
+    return await initializeSecurity();
+  }
+  return true;
+}
+
+/**
  * Check if domain is whitelisted
  * @param {string} domain - Domain to check
  * @returns {boolean} Whether domain is whitelisted
@@ -185,6 +199,9 @@ async function analyzeUrlSecurity(url) {
   };
 
   try {
+    // Ensure security modules are initialized (handles MV3 service worker wake-up)
+    await ensureSecurityInitialized();
+
     const urlObj = new URL(url);
     const domain = urlObj.hostname;
 
@@ -279,6 +296,9 @@ async function analyzePageSecurity(pageData) {
   };
 
   try {
+    // Ensure security modules are initialized (handles MV3 service worker wake-up)
+    await ensureSecurityInitialized();
+
     let domain = '';
     try {
       domain = new URL(pageData.url).hostname;
@@ -514,6 +534,7 @@ async function importSecurityData(data) {
 // Export for use in other modules
 if (typeof self !== 'undefined') {
   self.initializeSecurity = initializeSecurity;
+  self.ensureSecurityInitialized = ensureSecurityInitialized;
   self.analyzeUrlSecurity = analyzeUrlSecurity;
   self.analyzePageSecurity = analyzePageSecurity;
   self.getSecurityStats = getSecurityStats;
